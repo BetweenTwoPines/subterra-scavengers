@@ -1,14 +1,19 @@
 local msg_contact_point_response = hash("contact_point_response")
 local group_obstacle = hash("ground")
 
+-- max speed right/left
+local max_speed = 200
+-- gravity pulling the player down in pixel units
+local gravity = -1900
+
 function init(self)
 	msg.post(".", "acquire_input_focus")
-
-	self.moving = false
-	self.input = vmath.vector3()
-	self.dir = vmath.vector3(0, 1, 0)
-	self.speed = 150
+	
+	self.velocity = vmath.vector3()
 	self.correction = vmath.vector3()
+	self.facing_direction = 0
+	self.speed = 150
+	self.ground_contact = false
 end
 
 function final(self)
@@ -16,15 +21,17 @@ function final(self)
 end
 
 function update(self, dt)
-	if self.moving then
-		local pos = go.get_position()
-		pos = pos + self.dir * self.speed * dt
-		go.set_position(pos)
-	end
+	-- apply gravity
+	self.velocity.y = self.velocity.y + gravity * dt
 
-	self.input.x = 0
-	self.input.y = 0
-	self.moving = false
+	-- move player
+	local pos = go.get_position()
+	pos = pos + self.velocity * dt
+	go.set_position(pos)
+
+	-- reset volatile state
+	self.correction = vmath.vector3()
+	self.ground_contact = false
 end
 
 local function handle_obstacle_contact(self, normal, distance)
@@ -42,11 +49,14 @@ local function handle_obstacle_contact(self, normal, distance)
 		end
 	end
 
-	-- collided with a wall
-	-- stop horizontal movement
+	-- collided with a wall. Stop horizontal movement
 	if math.abs(normal.x) > 0.7 then
-		-- self.wall_contact = true
-		self.speed = 0
+		self.velocity.x = 0
+	end
+	-- collided with the ground. stop vertical movement
+	if normal.y > 0.7 then
+		self.ground_contact = true
+		self.velocity.y = 0
 	end
 end
 
@@ -73,21 +83,23 @@ function dig()
 	tilemap.set_tile("/level#level", 'layer1', tileX, tileY, 0)
 end
 
+local function walk(self, direction)
+	-- only change facing direction if direction is other than 0
+	if direction ~= 0 then
+		self.facing_direction = direction
+	end
+	-- update velocity and use different velocity on ground
+	if self.ground_contact then
+		self.velocity.x = max_speed * direction
+	end
+end
+
 function on_input(self, action_id, action)
 	if action_id == hash("left") then
-		self.input.x = -1
+		walk(self, -action.value)
 	elseif action_id == hash("right") then
-		self.input.x = 1
+		walk(self, action.value)
 	elseif action_id == hash("dig") then
 		dig()
 	end
-
-	if vmath.length(self.input) > 0 then
-		self.moving = true
-		self.dir = vmath.normalize(self.input)
-	end
-
-	-- reset volatile state
-	self.correction = vmath.vector3()
-	self.speed = 150
 end
