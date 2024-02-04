@@ -63,13 +63,21 @@ local function handle_obstacle_contact(self, normal, distance)
 end
 
 function on_message(self, message_id, message, sender)
-	-- check if we received a contact point message
-	if message_id == msg_contact_point_response then
+	-- recieve from gui.gui_script
+	if message_id == hash("dig_allowed") then
+		dig()
+	elseif message_id == hash("dig_denied") then
+		-- TODO: Handle denial (e.g., show an alert to the player)
+	elseif message_id == msg_contact_point_response then
 		-- check that the object is something we consider an obstacle
 		if message.group == group_obstacle then
 			handle_obstacle_contact(self, message.normal, message.distance)
 		end
 	end
+end
+
+function try_dig(self)
+	msg.post("/gui#ui", "use_energy_if_possible")
 end
 
 function dig()
@@ -83,6 +91,8 @@ function dig()
 
 	-- remove tile
 	tilemap.set_tile("/level#level", 'layer1', tileX, tileY, 0)
+	-- notify gui to update energy level
+	msg.post("/gui#ui", "use_energy", {energyUsed = 1})
 end
 
 local function walk(self, direction)
@@ -102,6 +112,6 @@ function on_input(self, action_id, action)
 	elseif action_id == hash("right") then
 		walk(self, action.value)
 	elseif action_id == hash("dig") then
-		dig()
+		try_dig(self)
 	end
 end
