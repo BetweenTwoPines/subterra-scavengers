@@ -12,5 +12,5 @@ key_trigger {
 }
 mouse_trigger {
   input: MOUSE_BUTTON_LEFT
-  action: "remove_tile"
+  action: "interact"
 }
