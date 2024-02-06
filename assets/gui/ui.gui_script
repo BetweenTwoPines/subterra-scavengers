@@ -1,0 +1,22 @@
+function init(self)
+	-- Save energy bar node so we can scale it based on players energy
+	self.player_energy_node = gui.get_node("player_energy")
+	-- Remember initial width of the node so we can reset it back to it when energy resets
+	self.energy_bar_intial_scale = gui.get_scale(self.player_energy_node).x
+	-- Total possible energy user has. can be increased based on skills, perks, etc.
+end
+
+local function update_energy_bar(self, energyBarScaleRatio)
+	-- because energy bar's scale is not 1 we need to multiple by its intial scale
+	local fill_percentage = energyBarScaleRatio * self.energy_bar_intial_scale
+	local current_scale = gui.get_scale(self.player_energy_node)
+	local new_scale = vmath.vector3(fill_percentage, current_scale.y, current_scale.z)
+	gui.set_scale(self.player_energy_node, new_scale)
+end
+
+function on_message(self, message_id, message, sender)
+	-- recieve from player.script
+	if message_id == hash("use_energy") then
+		update_energy_bar(self, message.energyRemainingRatio)
+	end 
+end
