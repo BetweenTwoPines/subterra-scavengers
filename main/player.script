@@ -2,8 +2,6 @@ local rendercam = require "rendercam.rendercam"
 
 local msg_contact_point_response = hash("contact_point_response")
 local group_obstacle = hash("ground")
-local group_obstacle = hash("ground")
-local energy_buildup_interval = 200
 
 local TILE_SIZE = 64
 
@@ -19,6 +17,8 @@ local anim_walk_left = hash("player_left")
 
 local max_energy = 5
 
+local energy_regen_interval_in_seconds = 1
+
 function init(self)
 	msg.post("#camera", "acquire_camera_focus")
 	msg.post("@render:", "use_camera_projection")
@@ -27,13 +27,15 @@ function init(self)
 	self.velocity = vmath.vector3()
 	self.correction = vmath.vector3()
 	self.facing_direction = 0
-	self.time_left_till_energy_buildup = energy_buildup_interval
 	self.speed = 150
 	self.ground_contact = false
     self.current_energy = max_energy
   
 	-- the currently playing animation
 	self.currentAnimation = nil
+	timer.delay(energy_regen_interval_in_seconds, true, function(self) 
+		updateEnergy(self, 1)
+	end)
 end
 
 local function play_animation(self, anim)
@@ -64,16 +66,6 @@ function final(self)
 	msg.post(".", "release_input_focus")
 end
 
-function handleEnergyRegeneration(self)
-	if self.time_left_till_energy_buildup == 0 then
-		updateEnergy(self, 1)
-		self.time_left_till_energy_buildup = energy_buildup_interval
-	else
-		self.time_left_till_energy_buildup = self.time_left_till_energy_buildup - 1
-		print(self.time_left_till_energy_buildup)
-	end
-end 
-
 function update(self, dt)
 	-- apply gravity
 	self.velocity.y = self.velocity.y + gravity * dt
@@ -89,8 +81,6 @@ function update(self, dt)
 	-- reset volatile state
 	self.correction = vmath.vector3()
 	self.ground_contact = false
-
-	handleEnergyRegeneration(self)
 end
 
 local function handle_obstacle_contact(self, normal, distance)
@@ -120,12 +110,7 @@ local function handle_obstacle_contact(self, normal, distance)
 end
 
 function on_message(self, message_id, message, sender)
-	-- recieve from gui.gui_script
-	if message_id == hash("dig_allowed") then
-		dig()
-	elseif message_id == hash("dig_denied") then
-		-- TODO: Handle denial (e.g., show an alert to the player)
-	elseif message_id == msg_contact_point_response then
+	if message_id == msg_contact_point_response then
 		-- check that the object is something we consider an obstacle
 		if message.group == group_obstacle then
 			handle_obstacle_contact(self, message.normal, message.distance)
