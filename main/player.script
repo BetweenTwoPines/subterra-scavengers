@@ -1,7 +1,11 @@
 local rendercam = require "rendercam.rendercam"
 
+local rendercam = require "rendercam.rendercam"
+
 local msg_contact_point_response = hash("contact_point_response")
 local group_obstacle = hash("ground")
+
+local TILE_SIZE = 64
 
 local TILE_SIZE = 64
 
@@ -149,6 +153,17 @@ local function walk(self, direction)
 	if self.ground_contact then
 		self.velocity.x = max_speed * direction
 	end
+end
+
+local function canRemoveTile(self, targetTileX, targetTileY)
+	local playerPosition = go.get_position()
+	local x = math.ceil(playerPosition.x / TILE_SIZE)
+	local y = math.ceil(playerPosition.y / TILE_SIZE)
+	if math.abs(x - targetTileX) > 1 or math.abs(y - targetTileY) > 1 then
+		return false
+	else
+		return true
+	end	
 end
 
 local function canRemoveTile(self, targetTileX, targetTileY)
