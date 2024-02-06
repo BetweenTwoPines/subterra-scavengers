@@ -5,6 +5,7 @@ local group_obstacle = hash("ground")
 local max_speed = 200
 -- gravity pulling the player down in pixel units
 local gravity = -1900
+local max_energy = 5
 
 function init(self)
 	msg.post("#camera", "acquire_camera_focus")
@@ -16,6 +17,7 @@ function init(self)
 	self.facing_direction = 0
 	self.speed = 150
 	self.ground_contact = false
+	self.current_energy = max_energy
 end
 
 function final(self)
@@ -77,10 +79,14 @@ function on_message(self, message_id, message, sender)
 end
 
 function try_dig(self)
-	msg.post("/gui#ui", "use_energy_if_possible")
+	if self.current_energy > 0 then
+		dig(self)
+	else
+		-- TODO: handle some kind of notification
+	end
 end
 
-function dig()
+function dig(self)
 	local playerPosition = go.get_position()
 
 	-- size of each tile on the level
@@ -91,8 +97,12 @@ function dig()
 
 	-- remove tile
 	tilemap.set_tile("/level#level", 'layer1', tileX, tileY, 0)
-	-- notify gui to update energy level
-	msg.post("/gui#ui", "use_energy", {energyUsed = 1})
+
+	-- update energy counter
+	self.current_energy = self.current_energy - 1
+
+	-- notify GUI to scale energy bar
+	msg.post("/gui#ui", "use_energy", {energyRemainingRatio = self.current_energy / max_energy})
 end
 
 local function walk(self, direction)
@@ -112,6 +122,12 @@ function on_input(self, action_id, action)
 	elseif action_id == hash("right") then
 		walk(self, action.value)
 	elseif action_id == hash("dig") then
-		try_dig(self)
+		local currentTime = os.clock()
+		-- 0.5 seconds debounce, otherwise multiple energies get subtracted
+		if not self.lastProcessed or currentTime - self.lastProcessed > 0.5 then
+			self.lastProcessed = currentTime
+			-- notify gui to update energy level
+			try_dig(self)
+		end
 	end
 end

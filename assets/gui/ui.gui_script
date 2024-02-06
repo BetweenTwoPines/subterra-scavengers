@@ -1,16 +1,14 @@
-local max_energy = 5
 function init(self)
 	-- Save energy bar node so we can scale it based on players energy
 	self.player_energy_node = gui.get_node("player_energy")
 	-- Remember initial width of the node so we can reset it back to it when energy resets
 	self.energy_bar_intial_scale = gui.get_scale(self.player_energy_node).x
 	-- Total possible energy user has. can be increased based on skills, perks, etc.
-	self.current_energy = max_energy
 end
 
-local function update_energy_bar(self)
+local function update_energy_bar(self, energyBarScaleRatio)
 	-- because energy bar's scale is not 1 we need to multiple by its intial scale
-	local fill_percentage = self.current_energy / max_energy * self.energy_bar_intial_scale
+	local fill_percentage = energyBarScaleRatio * self.energy_bar_intial_scale
 	local current_scale = gui.get_scale(self.player_energy_node)
 	local new_scale = vmath.vector3(fill_percentage, current_scale.y, current_scale.z)
 	gui.set_scale(self.player_energy_node, new_scale)
@@ -18,23 +16,7 @@ end
 
 function on_message(self, message_id, message, sender)
 	-- recieve from player.script
-	if message_id == hash("use_energy_if_possible") then
-		if self.current_energy > 0 then
-			-- Proceed with the dig operation here or notify the player.script to do so
-			msg.post(sender, "dig_allowed", {})
-		else
-			msg.post(sender, "dig_denied", { reason = "Not enough energy" })
-		end
-	elseif message_id == hash("use_energy") then
-		local currentTime = os.clock()
-		-- 0.5 seconds debounce, otherwise multiple energies get subtracted
-		if not self.lastProcessed or currentTime - self.lastProcessed > 0.5 then
-			self.lastProcessed = currentTime
-			self.current_energy = self.current_energy - message.energyUsed
-			-- Only scale energy bar while player has energy
-			if self.current_energy >= 0 then
-				update_energy_bar(self)
-			end
-		end
+	if message_id == hash("use_energy") then
+		update_energy_bar(self, message.energyRemainingRatio)
 	end 
 end
