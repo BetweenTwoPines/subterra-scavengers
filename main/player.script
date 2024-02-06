@@ -5,6 +5,10 @@ local group_obstacle = hash("ground")
 local max_speed = 200
 -- gravity pulling the player down in pixel units
 local gravity = -1900
+local anim_idle = hash("player_idle")
+local anim_walk_right = hash("player_right")
+local anim_walk_left = hash("player_left")
+
 local max_energy = 5
 
 function init(self)
@@ -17,7 +21,34 @@ function init(self)
 	self.facing_direction = 0
 	self.speed = 150
 	self.ground_contact = false
-	self.current_energy = max_energy
+  self.current_energy = max_energy
+  
+	-- the currently playing animation
+	self.currentAnimation = nil
+end
+
+local function play_animation(self, anim)
+	-- only play animations which are not already playing
+	if self.currentAnimation ~= anim then
+		-- tell the sprite to play the animation
+		sprite.play_flipbook("#sprite", anim)
+		-- remember which animation is playing
+		self.currentAnimation = anim
+	end
+end
+
+local function update_animations(self)
+	-- make sure the player character faces the right way
+	sprite.set_hflip("#player", self.facing_direction < 0)
+	if self.velocity.x == 0 then
+		play_animation(self, anim_idle)
+	else
+		if self.facing_direction == 1 then
+			play_animation(self, anim_walk_right)
+		else
+			play_animation(self, anim_walk_left)
+		end
+	end
 end
 
 function final(self)
@@ -32,6 +63,9 @@ function update(self, dt)
 	local pos = go.get_position()
 	pos = pos + self.velocity * dt
 	go.set_position(pos)
+
+	-- update player animation based its state
+	update_animations(self)
 
 	-- reset volatile state
 	self.correction = vmath.vector3()
