@@ -1,5 +1,9 @@
+local rendercam = require "rendercam.rendercam"
+
 local msg_contact_point_response = hash("contact_point_response")
 local group_obstacle = hash("ground")
+
+local TILE_SIZE = 64
 
 -- max speed right/left
 local max_speed = 200
@@ -76,10 +80,9 @@ function dig()
 	local playerPosition = go.get_position()
 
 	-- size of each tile on the level
-	local tileSize = 64
-	local tileX = math.ceil(playerPosition.x / tileSize)
+	local tileX = math.ceil(playerPosition.x / TILE_SIZE)
 	-- Subtracting 1 to dig 'below' the player
-	local tileY = math.ceil(playerPosition.y / tileSize) - 1
+	local tileY = math.ceil(playerPosition.y / TILE_SIZE) - 1
 
 	-- remove tile
 	tilemap.set_tile("/level#level", 'layer1', tileX, tileY, 0)
@@ -96,6 +99,17 @@ local function walk(self, direction)
 	end
 end
 
+local function canRemoveTile(self, targetTileX, targetTileY)
+	local playerPosition = go.get_position()
+	local x = math.ceil(playerPosition.x / TILE_SIZE)
+	local y = math.ceil(playerPosition.y / TILE_SIZE)
+	if math.abs(x - targetTileX) > 1 or math.abs(y - targetTileY) > 1 then
+		return false
+	else
+		return true
+	end	
+end
+
 function on_input(self, action_id, action)
 	if action_id == hash("left") then
 		walk(self, -action.value)
@@ -103,5 +117,16 @@ function on_input(self, action_id, action)
 		walk(self, action.value)
 	elseif action_id == hash("dig") then
 		dig()
+	elseif action_id == hash("remove_tile") and action.pressed then
+		local clickPosition = rendercam.screen_to_world_2d(action.screen_x, action.screen_y, false, 0)
+		local x = math.ceil(clickPosition.x / TILE_SIZE)
+		local y = math.ceil(clickPosition.y / TILE_SIZE)
+		local currentTile = tilemap.get_tile("/level#level", 'layer1', x, y)
+		
+		-- cannot dig through outside walls of the level and father than adjacent tile to character
+		if currentTile ~= 23 and canRemoveTile(self, x, y) then
+			tilemap.set_tile("/level#level", 'layer1', x, y, 0)
+		end
+		
 	end
 end
