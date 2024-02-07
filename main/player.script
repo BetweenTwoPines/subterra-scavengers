@@ -1,5 +1,5 @@
-local rendercam = require "rendercam.rendercam"
 
+local rendercam = require "rendercam.rendercam"
 local msg_contact_point_response = hash("contact_point_response")
 local group_obstacle = hash("ground")
 
@@ -17,9 +17,10 @@ local anim_walk_left = hash("player_left")
 
 local max_energy = 5
 
-local energy_regen_interval_in_seconds = 1
+local energy_regen_interval_in_seconds = 2
 
 function init(self)
+	defos.set_cursor_visible(false)
 	msg.post("#camera", "acquire_camera_focus")
 	msg.post("@render:", "use_camera_projection")
 	msg.post(".", "acquire_input_focus")
@@ -189,7 +190,8 @@ function on_input(self, action_id, action)
 		if currentTile ~= 23 and canRemoveTile(self, x, y) then
 			try_dig(self, x, y)
 		end
-	elseif not action_id then
-		
+	elseif action_id == hash("escape") then
+		msg.post("@system:", "exit", {code = 0})
 	end
+	msg.post("/crosshair", update_crosshair_position, { x = action.screen_x, y = action.screen_y })
 end
