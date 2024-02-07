@@ -6,7 +6,7 @@ local group_obstacle = hash("ground")
 local TILE_SIZE = 64
 
 -- max speed right/left
-local max_speed = 200
+local max_speed = 150
 local max_upwards_speed = 500
 local no_energy_upwards_speed = 100
 -- gravity pulling the player down in pixel units
@@ -30,6 +30,7 @@ function init(self)
 	self.facing_direction = 0
 	self.speed = 150
 	self.ground_contact = false
+	self.wall_contact = false
     self.current_energy = max_energy
   
 	-- the currently playing animation
@@ -82,6 +83,7 @@ function update(self, dt)
 	-- reset volatile state
 	self.correction = vmath.vector3()
 	self.ground_contact = false
+	self.wall_contact = false
 end
 
 local function handle_obstacle_contact(self, normal, distance)
@@ -101,6 +103,7 @@ local function handle_obstacle_contact(self, normal, distance)
 
 	-- collided with a wall. Stop horizontal movement
 	if math.abs(normal.x) > 0.7 then
+		self.wall_contact = true
 		self.velocity.x = 0
 	end
 	-- collided with the ground. stop vertical movement
@@ -150,6 +153,11 @@ local function walk(self, direction)
 	-- only change facing direction if direction is other than 0
 	if direction ~= 0 then
 		self.facing_direction = direction
+	end
+	if self.wall_contact ~= true then
+		-- notify background to move with player
+		msg.post("/sky#sky", "move_background", { direction = self.facing_direction * -1 })
+		msg.post("/treeline#treeline", "move_background", { direction = self.facing_direction * -1 })
 	end
 	-- update velocity and use different velocity on ground
 	self.velocity.x = max_speed * direction
