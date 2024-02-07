@@ -1,16 +1,14 @@
 local rendercam = require "rendercam.rendercam"
 
-local rendercam = require "rendercam.rendercam"
-
 local msg_contact_point_response = hash("contact_point_response")
 local group_obstacle = hash("ground")
 
 local TILE_SIZE = 64
 
-local TILE_SIZE = 64
-
 -- max speed right/left
 local max_speed = 200
+local max_upwards_speed = 500
+local no_energy_upwards_speed = 100
 -- gravity pulling the player down in pixel units
 local gravity = -1900
 local anim_idle = hash("player_idle")
@@ -18,6 +16,8 @@ local anim_walk_right = hash("player_right")
 local anim_walk_left = hash("player_left")
 
 local max_energy = 5
+
+local energy_regen_interval_in_seconds = 1
 
 function init(self)
 	msg.post("#camera", "acquire_camera_focus")
@@ -29,10 +29,13 @@ function init(self)
 	self.facing_direction = 0
 	self.speed = 150
 	self.ground_contact = false
-  self.current_energy = max_energy
+    self.current_energy = max_energy
   
 	-- the currently playing animation
 	self.currentAnimation = nil
+	timer.delay(energy_regen_interval_in_seconds, true, function(self) 
+		updateEnergy(self, 1)
+	end)
 end
 
 local function play_animation(self, anim)
@@ -107,12 +110,7 @@ local function handle_obstacle_contact(self, normal, distance)
 end
 
 function on_message(self, message_id, message, sender)
-	-- recieve from gui.gui_script
-	if message_id == hash("dig_allowed") then
-		dig()
-	elseif message_id == hash("dig_denied") then
-		-- TODO: Handle denial (e.g., show an alert to the player)
-	elseif message_id == msg_contact_point_response then
+	if message_id == msg_contact_point_response then
 		-- check that the object is something we consider an obstacle
 		if message.group == group_obstacle then
 			handle_obstacle_contact(self, message.normal, message.distance)
@@ -124,8 +122,15 @@ function removeTile(x, y)
 	tilemap.set_tile("/level#level", 'layer1', x, y, 0)
 end
 
+function updateEnergy(self, changeBy)
+	if (changeBy < 0 and self.current_energy > 0) or (changeBy > 0 and self.current_energy < max_energy) then
+		self.current_energy = self.current_energy + changeBy
+		-- notify GUI to scale energy bar
+		msg.post("/gui#ui", "use_energy", {energyRemainingRatio = self.current_energy / max_energy})
+	end
+end 
+
 function try_dig(self, x, y)
-	print(hash("try to dig"))
 	if self.current_energy > 0 then
 		dig(self, x , y)
 	else
@@ -137,11 +142,7 @@ function dig(self, x, y)
 	removeTile(x, y)
 
 	-- update energy counter
-	self.current_energy = self.current_energy - 1
-
-	-- notify GUI to scale energy bar
-	
-	msg.post("/gui#ui", "use_energy", {energyRemainingRatio = self.current_energy / max_energy})
+	updateEnergy(self, -1)
 end
 
 local function walk(self, direction)
@@ -150,20 +151,7 @@ local function walk(self, direction)
 		self.facing_direction = direction
 	end
 	-- update velocity and use different velocity on ground
-	if self.ground_contact then
-		self.velocity.x = max_speed * direction
-	end
-end
-
-local function canRemoveTile(self, targetTileX, targetTileY)
-	local playerPosition = go.get_position()
-	local x = math.ceil(playerPosition.x / TILE_SIZE)
-	local y = math.ceil(playerPosition.y / TILE_SIZE)
-	if math.abs(x - targetTileX) > 1 or math.abs(y - targetTileY) > 1 then
-		return false
-	else
-		return true
-	end	
+	self.velocity.x = max_speed * direction
 end
 
 local function canRemoveTile(self, targetTileX, targetTileY)
@@ -182,13 +170,14 @@ function on_input(self, action_id, action)
 		walk(self, -action.value)
 	elseif action_id == hash("right") then
 		walk(self, action.value)
-	elseif action_id == hash("dig") then
-		local currentTime = os.clock()
-		-- 0.5 seconds debounce, otherwise multiple energies get subtracted
-		if not self.lastProcessed or currentTime - self.lastProcessed > 0.5 then
-			self.lastProcessed = currentTime
-			-- notify gui to update energy level
-			try_dig(self)
+	elseif action_id == hash("jump") then
+		if (self.velocity.y == 0) then
+			if (self.current_energy > 0) then
+				updateEnergy(self, -1)
+				self.velocity.y = max_upwards_speed
+			else 
+				self.velocity.y = no_energy_upwards_speed
+			end
 		end
 	elseif action_id == hash("interact") and action.pressed then
 		local clickPosition = rendercam.screen_to_world_2d(action.screen_x, action.screen_y, false, 0)
@@ -200,7 +189,7 @@ function on_input(self, action_id, action)
 		if currentTile ~= 23 and canRemoveTile(self, x, y) then
 			try_dig(self, x, y)
 		end
+	elseif not action_id then
 		
-
 	end
 end

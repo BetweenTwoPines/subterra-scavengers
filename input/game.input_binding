@@ -8,7 +8,15 @@ key_trigger {
 }
 key_trigger {
   input: KEY_SPACE
-  action: "dig"
+  action: "jump"
+}
+key_trigger {
+  input: KEY_A
+  action: "left"
+}
+key_trigger {
+  input: KEY_D
+  action: "right"
 }
 mouse_trigger {
   input: MOUSE_BUTTON_LEFT
