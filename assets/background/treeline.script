@@ -17,7 +17,7 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash('move_background') then
 		local p = go.get_position()
-		p.x = p.x + 0.1 * message.direction
+		p.x = p.x + 0.2 * message.direction
 		go.set_position(p)
 	end
 end

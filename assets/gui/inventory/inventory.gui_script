@@ -1,0 +1,108 @@
+-- Storing gui nodes in different variables in case we ever need to interact with a subset (drag, drop, etc) 
+local inventory_nodes = {}
+local supplemental_nodes = {}
+local inventory_item_nodes = {}
+local inventory_items = {"ORE", "IRON", "ETC"}
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	
+	self.is_inventory_open = false
+	self.inventory_tile_length = 100
+	self.backpack_size = 4
+	self.screen = {w = gui.get_width(), h = gui.get_height()}
+
+end
+
+function final(self)
+
+end
+
+function update(self, dt)
+
+end
+
+function on_message(self, message_id, message, sender)
+
+end
+
+local function renderInventory(self)
+	self.is_inventory_open = true
+	local start_x = (self.screen.w - self.inventory_tile_length) / 2
+	local start_y = (self.screen.h + self.inventory_tile_length) / 2
+
+	local spacing = 0 -- Add some spacing between nodes if desired
+	local backpackRowsAnCols =  math.sqrt(self.backpack_size)
+	local itemIndex = 1 -- Start from the first item
+	for row = 0, backpackRowsAnCols - 1 do
+		for col = 0, backpackRowsAnCols - 1 do
+			-- Calculate position for each node
+			local x = start_x + (col * (self.inventory_tile_length + spacing))
+			local y = start_y - (row * (self.inventory_tile_length + spacing))
+
+			-- Create inventory background
+			if row == 0 and col == 0 then
+				local background_size = backpackRowsAnCols * self.inventory_tile_length + 100
+				local new_size = vmath.vector3(background_size, background_size, 0)
+				local new_boxnode = gui.new_box_node(vmath.vector3(x + 50, y - 50, 0), new_size)
+				table.insert(inventory_nodes, new_boxnode)
+				gui.set_color(new_boxnode, vmath.vector4(0.2, 0.26, 0.32, 1))
+
+				-- Add inventory text to the container
+				local text_position = vmath.vector3(x + 50, y - 50 + new_size.y / 2 - 20, 0)
+				local new_textnode = gui.new_text_node(text_position, "Inventory")
+				table.insert(supplemental_nodes, new_textnode)
+
+				gui.set_color(new_textnode, vmath.vector4(1, 1, 1, 1))
+			end
+			
+			-- inventory tile node
+			local node = gui.new_box_node(vmath.vector3(x, y, 0), vmath.vector3(self.inventory_tile_length, self.inventory_tile_length, 0))
+			table.insert(inventory_nodes, node)
+			gui.set_texture(node, "inventory")
+			-- Set the texture of the node to use 'inventory_cell' from 'inventory.atlas'
+			gui.play_flipbook(node, "inventory_cell")
+
+			-- Check if there's an item to display
+			if itemIndex <= #inventory_items then
+				-- Create and position a text node for the current item
+				local itemText = inventory_items[itemIndex]
+				local textNode = gui.new_text_node(vmath.vector3(x, y, 0), itemText)
+				gui.set_color(textNode, vmath.vector4(0.8, 0.3, 0.1, 1)) -- Set text color, adjust as needed
+				gui.set_pivot(textNode, gui.PIVOT_CENTER) -- Center the text in the tile
+				table.insert(inventory_item_nodes, textNode) -- Add the text node to your nodes table if needed
+
+				itemIndex = itemIndex + 1
+			end
+		end
+	end
+end
+
+local function clearNodeTable(nodeTable)
+	for i = #nodeTable, 1, -1 do
+		local node = nodeTable[i]
+		gui.delete_node(node)
+		table.remove(nodeTable, i)
+	end
+end
+
+local function closeInventory(self)
+	self.is_inventory_open = false
+	clearNodeTable(inventory_nodes)
+	clearNodeTable(supplemental_nodes)
+	clearNodeTable(inventory_item_nodes)
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("inventory") and action.pressed then
+		if self.is_inventory_open == false then
+			renderInventory(self)
+		else
+			closeInventory(self)
+		end
+	end
+end
+
+function on_reload(self)
+
+end
