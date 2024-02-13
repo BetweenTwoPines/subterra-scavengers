@@ -19,6 +19,8 @@ function on_message(self, message_id, message, sender)
 		show(self, "#menuproxy")
 	elseif message_id == hash("load_level") then
 		show(self, "#levelproxy")
+	elseif message_id == hash("load_hub") then
+		show(self, "#hubproxy")
 	elseif message_id == hash("proxy_loaded") then
 		self.current_proxy = sender
 		msg.post(sender, "enable")
