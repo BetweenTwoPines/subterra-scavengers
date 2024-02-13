@@ -1,0 +1,27 @@
+local function show(self, proxy)
+	if self.current_proxy then
+		-- make sure we unload proxies that are not in use
+		msg.post(self.current_proxy, "unload")
+		self.current_proxy = nil
+	end
+	-- Might need to render loading screen here while we load level
+	msg.post(proxy, "async_load")
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.current_proxy = nil
+	msg.post("#", "show_menu")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show_menu") then
+		show(self, "#menuproxy")
+	elseif message_id == hash("load_level") then
+		show(self, "#levelproxy")
+	elseif message_id == hash("proxy_loaded") then
+		self.current_proxy = sender
+		msg.post(sender, "enable")
+		-- Hide loading screen here
+	end
+end
