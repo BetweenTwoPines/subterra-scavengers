@@ -1,4 +1,4 @@
-local function show(self, proxy)
+local function show(self, proxy, state)
 	if self.current_proxy then
 		-- make sure we unload proxies that are not in use
 		msg.post(self.current_proxy, "unload")
@@ -11,6 +11,7 @@ end
 function init(self)
 	msg.post(".", "acquire_input_focus")
 	self.current_proxy = nil
+	self.data_object = nil
 	msg.post("#", "show_menu")
 end
 
@@ -20,10 +21,23 @@ function on_message(self, message_id, message, sender)
 	elseif message_id == hash("load_level") then
 		show(self, "#levelproxy")
 	elseif message_id == hash("load_hub") then
-		show(self, "#hubproxy")
+		-- Hardcode for now, but this has to be sent from main.collection at the end of the round
+		local state = {
+			energy_level = 10,
+			inventory = {
+				row = 2,
+				col = 4
+				-- TODO: send all items to appear in inventory
+			}
+		}
+		self.data_object = state
+		show(self, "#hubproxy", state)
 	elseif message_id == hash("proxy_loaded") then
 		self.current_proxy = sender
 		msg.post(sender, "enable")
+		if self.data_object then
+			msg.post("hub:/hub#hub", 'render_state' ,self.data_object)
+		end
 		-- Hide loading screen here
 	end
 end

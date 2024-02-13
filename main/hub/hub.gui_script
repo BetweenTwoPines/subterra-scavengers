@@ -1,9 +1,36 @@
-function set_background_size(self)
+local function updateGUIValues(self)
+	-- Set players energy
+	local energy = gui.get_node("energy_value")
+	gui.set_text(energy, self.state.energy_level)
+end
 
+-- Dynamically generates inventory grid based on on the position of initial node
+local function create_inventory_grid(self)
+	local cell_id = hash("inventory_cell") -- The original cell node ID
+	local initial_node = gui.get_node(cell_id)
+	local cell_position = gui.get_position(initial_node)
+	
+	for row = 1, self.state.inventory.row do
+		for col = 1, self.state.inventory.col do
+			-- avoid duplicating initial_node
+			if row ~= 1 or col ~= 1 then
+				-- Clone the inventory_cell node
+				local cloned_nodes = gui.clone_tree(initial_node)
+				local cloned_cell_id = cloned_nodes[cell_id]
+
+				local x_pos = ((col - 1) * 30) + cell_position.x
+				local y_pos = ((row - 1) * -20) + cell_position.y
+				local position = vmath.vector3(x_pos, y_pos, 0) -- Assuming top-down layout
+
+				-- Set the position of the cloned cell
+				gui.set_position(cloned_cell_id, position)
+			end
+		end
+	end
 end
 
 function init(self)
-
+	self.state = nil
 end
 
 function final(self)
@@ -19,9 +46,12 @@ function update(self, dt)
 end
 
 function on_message(self, message_id, message, sender)
-	-- Add message-handling code here
-	-- Learn more: https://defold.com/manuals/message-passing/
-	-- Remove this function if not needed
+	print(msg.url())
+	if message_id == hash('render_state') then
+		self.state = message
+		updateGUIValues(self)
+		create_inventory_grid(self)
+	end
 end
 
 function on_input(self, action_id, action)
