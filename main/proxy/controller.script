@@ -1,7 +1,8 @@
-local function show(self, proxy, state)
+local function show(self, proxy)
 	if self.current_proxy then
 		-- make sure we unload proxies that are not in use
 		msg.post(self.current_proxy, "unload")
+		self.data_object = nil
 		self.current_proxy = nil
 	end
 	-- Might need to render loading screen here while we load level
@@ -30,8 +31,8 @@ function on_message(self, message_id, message, sender)
 				-- TODO: send all items to appear in inventory
 			}
 		}
+		show(self, "#hubproxy")
 		self.data_object = state
-		show(self, "#hubproxy", state)
 	elseif message_id == hash("proxy_loaded") then
 		self.current_proxy = sender
 		msg.post(sender, "enable")
