@@ -18,5 +18,7 @@ function on_message(self, message_id, message, sender)
 	-- recieve from player.script
 	if message_id == hash("use_energy") then
 		update_energy_bar(self, message.energyRemainingRatio)
-	end 
+	elseif message_id == hash("debug_tile_count") then
+		gui.set_text(gui.get_node("debug_tile_count"), ("total: %d, visible: %d"):format(message.total, message.visible))
+	end
 end

@@ -1,8 +1,7 @@
-local rendercam = require "rendercam.rendercam"
-update_crosshair_position = hash("update_crosshair_position")
+go.property("type", tileType.EMPTY)
 
 function init(self)
-	--msg.post(".", "acquire_input_focus")
+	-- sprite.play_flipbook("", id)
 	-- Add initialization code here
 	-- Learn more: https://defold.com/manuals/script/
 	-- Remove this function if not needed
@@ -30,11 +29,6 @@ function fixed_update(self, dt)
 end
 
 function on_message(self, message_id, message, sender)
-	if message_id == update_crosshair_position then
-		local new_position = rendercam.screen_to_world_2d(message.x, message.y, false, 1)
-		--pprint(new_position)
-		go.set_position(new_position)
-	end
 	-- Add message-handling code here
 	-- Learn more: https://defold.com/manuals/message-passing/
 	-- Remove this function if not needed
