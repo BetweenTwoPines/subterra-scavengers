@@ -1,0 +1,91 @@
+local max_speed = 200
+local anim_walk_right = hash("meowgre_walk_right")
+local anim_walk_left = hash("meowgre_walk_left")
+local gravity = -1900
+local msg_contact_point_response = hash("contact_point_response")
+local group_obstacle = hash("ground")
+
+local function handle_obstacle_contact(self, normal, distance, other_id)
+	if distance > 0 then
+		local proj = vmath.project(self.correction, normal * distance)
+		if proj < 1 then
+			-- Only care for projections that does not overshoot.
+			local comp = (distance - distance * proj) * normal
+			-- Apply compensation
+			go.set_position(go.get_position() + comp)
+			-- Accumulate correction done
+			self.correction = self.correction + comp
+		else
+			-- collided with a wall; change direction
+			if math.abs(normal.x) > .7 then
+				self.facing_direction = self.facing_direction * -1 
+			end
+		end
+	end
+	
+	-- collided with the ground. stop vertical movement
+	if normal.y > 0.7 then
+		self.ground_contact = true
+		self.velocity.y = 0
+	end
+end
+
+local function walk(self, dt)
+	-- update velocity and use different velocity on ground
+
+	
+	self.velocity.x = self.speed * self.facing_direction
+	local pos = go.get_position()
+	pos = pos + self.velocity * dt
+	go.set_position(pos)
+end
+
+function init(self)
+	self.velocity = vmath.vector3()
+	self.correction = vmath.vector3()
+	self.facing_direction = -1
+	self.speed = 150
+	self.ground_contact = false
+	self.wall_contact = false
+
+	self.currentAnimation = anim_walk_left
+end
+
+local function play_animation(self, anim)
+	-- only play animations which are not already playing
+	if self.currentAnimation ~= anim then
+		-- tell the sprite to play the animation
+		sprite.play_flipbook("#sprite", anim)
+		-- remember which animation is playing
+		self.currentAnimation = anim
+	end
+end
+
+local function update_animations(self)
+	-- make sure the player character faces the right way
+	sprite.set_hflip("#meowgre", self.facing_direction < 0)
+	if self.facing_direction == 1 then
+		play_animation(self, anim_walk_right)
+	else
+		play_animation(self, anim_walk_left)
+	end
+end
+
+function update(self, dt)
+	self.velocity.y = self.velocity.y + gravity * dt
+	walk(self, dt)
+	update_animations(self)
+
+	self.correction = vmath.vector3()
+	self.ground_contact = false
+	self.wall_contact = false
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == msg_contact_point_response then
+		-- check that the object is something we consider an obstacle
+		if message.group == group_obstacle then
+			handle_obstacle_contact(self, message.normal, message.distance, message.other_id)
+		end
+	end
+end
