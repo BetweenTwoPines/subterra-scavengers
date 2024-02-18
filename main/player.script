@@ -1,4 +1,4 @@
-
+local state = require "main.state.game"
 local rendercam = require "rendercam.rendercam"
 local msg_contact_point_response = hash("contact_point_response")
 local group_obstacle = hash("ground")
@@ -6,7 +6,7 @@ local group_obstacle = hash("ground")
 local TILE_SIZE = 64
 
 -- max speed right/left
-local max_speed = 150
+local max_speed = state.game_state.get_state_property(state.StateEnum.Player.MaxSpeed)
 local max_upwards_speed = 500
 local no_energy_upwards_speed = 100
 -- gravity pulling the player down in pixel units
@@ -15,7 +15,7 @@ local anim_idle = hash("player_idle")
 local anim_walk_right = hash("player_right")
 local anim_walk_left = hash("player_left")
 
-local max_energy = 5
+local max_energy = state.game_state.get_state_property(state.StateEnum.Player.MaxEnergy)
 
 local energy_regen_interval_in_seconds = 2
 
