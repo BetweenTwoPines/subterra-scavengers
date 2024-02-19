@@ -1,0 +1,48 @@
+local rendercam = require "rendercam.rendercam"
+local state = require "main.state.game"
+
+local max_energy = state.game_state.get_state_property(state.StateEnum.Player.MaxEnergy)
+local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Settings.TileSize)
+
+local function canRemoveTile(self, targetTileX, targetTileY)
+	local playerPosition = go.get_position()
+	local x = math.ceil(playerPosition.x / TILE_SIZE)
+	local y = math.ceil(playerPosition.y / TILE_SIZE)
+	if math.abs(x - targetTileX) > 1 or math.abs(y - targetTileY) > 1 then
+		return false
+	else
+		return true
+	end	
+end
+
+function updateEnergy(self, changeBy)
+	local current_energy = state.game_state.get_state_property(state.StateEnum.Player.CurrentEnergy)
+	if (changeBy < 0 and current_energy > 0) or (changeBy > 0 and current_energy < max_energy) then
+		local newValue = state.game_state.set_state_property(state.StateEnum.Player.CurrentEnergy, current_energy + changeBy)
+		-- notify GUI to scale energy bar
+		msg.post("/gui#ui", "use_energy", {energyRemainingRatio = newValue / max_energy})
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("interact") and action.pressed then
+		local clickPosition = rendercam.screen_to_world_2d(action.screen_x, action.screen_y, false, 0)
+		local x = math.ceil(clickPosition.x / TILE_SIZE)
+		local y = math.ceil(clickPosition.y / TILE_SIZE)
+		local currentTile = tilemap.get_tile("/level#level", 'layer1', x, y)
+		local availableEnergy = state.game_state.get_state_property(state.StateEnum.Player.CurrentEnergy)
+
+		-- cannot dig without enough energy
+		-- cannot dig through outside walls of the level (tile 23)
+		-- cannot dig father than adjacent tile to character
+		if availableEnergy > 0 and currentTile ~= 23 and canRemoveTile(self, x, y) then
+			tilemap.set_tile("/level#level", 'layer1', x, y, 0)
+
+			-- Generate ore from broken tile
+			-- TODO: Add flare to the dropped ore (randomize direction of appearing)
+			local position = vmath.vector3(x * (TILE_SIZE - 5), y * (TILE_SIZE - 20), 0.1)
+
+			factory.create("/factory#ore_factory", position, nil, {ore_type_id = 1})
+		end
+	end
+end
