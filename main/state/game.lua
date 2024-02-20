@@ -29,7 +29,7 @@ local game_state = {
 	[StateEnum.Inventory.Col] = 4,
 	[StateEnum.Settings.TileSize] = 64,
 	[StateEnum.Physics.Gravity] = -1900,
-	[StateEnum.Settings.MaxRoundTimeSeconds] = 5
+	[StateEnum.Settings.MaxRoundTimeSeconds] = 99999
 }
 
 function game_state.get_state_property(property)

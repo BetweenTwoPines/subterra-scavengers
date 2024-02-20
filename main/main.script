@@ -133,19 +133,9 @@ function fixed_update(self, dt)
 end
 
 function on_message(self, message_id, message, sender)
-	if message_id == hash("hit_tile") then
-		local key = get_key(message.x, message.y)
-		print("hit detected---------------")
-		pprint(key)
-		pprint(map[key])
-		local hitpoints = map[key].hitpoints - message.damage
-		map[key].hitpoints = hitpoints
-		pprint(hitpoints)
-		pprint(viewport[key])
-		if hitpoints <= 0 then
-			go.delete(viewport[key].id, true)
-			viewport[key] = nil
-		end
+	if message_id == hash("delete_tile") then
+		go.delete(viewport[message.key].id, true)
+		viewport[message.key] = nil
 	end
 	-- Add message-handling code here
 	-- Learn more: https://defold.com/manuals/message-passing/
