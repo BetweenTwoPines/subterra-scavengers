@@ -1,3 +1,7 @@
+local state = require "main.state.game"
+
+local max_round_time = state.game_state.get_state_property(state.StateEnum.Settings.MaxRoundTimeSeconds)
+
 local function show(self, proxy)
 	if self.current_proxy then
 		-- make sure we unload proxies that are not in use
@@ -11,7 +15,25 @@ end
 function init(self)
 	msg.post(".", "acquire_input_focus")
 	self.current_proxy = nil
+	self.timer = max_round_time
+	self.round_loaded = false
 	msg.post("#", "show_menu")
+end
+
+function update(self, dt)
+	-- Start the timer when round is loaded
+	if self.timer > 0 and self.round_loaded then
+		self.timer = self.timer - dt
+		if self.current_proxy then
+			msg.post("main:/gui#ui", "update_round_timer", {timeleft = self.timer})
+		end
+		if self.timer <= 0 then
+			self.round_loaded = false
+			show(self, "#hubproxy")
+			defos.set_cursor_visible(true)
+			self.timer = max_round_time
+		end
+	end
 end
 
 function on_message(self, message_id, message, sender)
@@ -19,6 +41,7 @@ function on_message(self, message_id, message, sender)
 		show(self, "#menuproxy")
 	elseif message_id == hash("load_level") then
 		show(self, "#levelproxy")
+		self.round_loaded = true
 	elseif message_id == hash("load_hub") then
 		show(self, "#hubproxy")
 	elseif message_id == hash("proxy_loaded") then
