@@ -11,7 +11,8 @@ local StateEnum = {
 		Col = "inventory_size_col"
 	},
 	Settings = {
-		TileSize = "settings_tile_size"
+		TileSize = "settings_tile_size",
+		MaxRoundTimeSeconds = "settings_max_round_time_seconds"
 	},
 	Physics = {
 		Gravity = "physics_gravity"
@@ -27,7 +28,8 @@ local game_state = {
 	[StateEnum.Inventory.Row] = 2,
 	[StateEnum.Inventory.Col] = 4,
 	[StateEnum.Settings.TileSize] = 64,
-	[StateEnum.Physics.Gravity] = -1900
+	[StateEnum.Physics.Gravity] = -1900,
+	[StateEnum.Settings.MaxRoundTimeSeconds] = 5
 }
 
 function game_state.get_state_property(property)
