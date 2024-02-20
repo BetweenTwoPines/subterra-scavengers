@@ -1,0 +1,27 @@
+local state = require "main.state.game"
+
+local max_energy = state.game_state.get_state_property(state.StateEnum.Player.MaxEnergy)
+local energy_regen_interval_in_seconds = 2
+
+local function updateEnergy(self, changeBy)
+	local current_energy = state.game_state.get_state_property(state.StateEnum.Player.CurrentEnergy)
+	if (changeBy < 0 and current_energy > 0) or (changeBy > 0 and current_energy < max_energy) then
+		local newValue = state.game_state.set_state_property(state.StateEnum.Player.CurrentEnergy, current_energy + changeBy)
+		-- notify GUI to scale energy bar
+		msg.post("/gui#ui", "use_energy", {energyRemainingRatio = newValue / max_energy})
+	end
+end
+
+function init(self)
+	state.game_state.set_state_property(state.StateEnum.Player.CurrentEnergy, max_energy)
+	
+	timer.delay(energy_regen_interval_in_seconds, true, function(self) 
+		updateEnergy(self, 1)
+	end)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("update_energy") then
+		updateEnergy(self, message.energyUsed)
+	end
+end

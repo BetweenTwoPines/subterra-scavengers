@@ -14,11 +14,16 @@ local function update_energy_bar(self, energyBarScaleRatio)
 	gui.set_scale(self.player_energy_node, new_scale)
 end
 
+local function update_round_timer(self, timeleft)
+	gui.set_text(gui.get_node("round_timer_text"), "Time remaining: " .. math.ceil(timeleft))
+end
+
 function on_message(self, message_id, message, sender)
-	-- recieve from player.script
 	if message_id == hash("use_energy") then
 		update_energy_bar(self, message.energyRemainingRatio)
 	elseif message_id == hash("debug_tile_count") then
 		gui.set_text(gui.get_node("debug_tile_count"), ("total: %d, visible: %d"):format(message.total, message.visible))
+	elseif message_id == hash("update_round_timer") then
+		update_round_timer(self, message.timeleft)
 	end
 end
