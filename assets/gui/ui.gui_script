@@ -15,7 +15,12 @@ local function update_energy_bar(self, energyBarScaleRatio)
 end
 
 local function update_round_timer(self, timeleft)
-	gui.set_text(gui.get_node("round_timer_text"), "Time remaining: " .. math.ceil(timeleft))
+	local minutes = math.floor(timeleft / 60)
+	local seconds = timeleft % 60
+
+	local formattedTime = string.format("%02d:%02d", minutes, seconds)
+	
+	gui.set_text(gui.get_node("round_timer_text"), "Round timer " .. formattedTime)
 end
 
 function on_message(self, message_id, message, sender)
