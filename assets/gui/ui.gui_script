@@ -21,6 +21,8 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash("use_energy") then
 		update_energy_bar(self, message.energyRemainingRatio)
+	elseif message_id == hash("debug_tile_count") then
+		gui.set_text(gui.get_node("debug_tile_count"), ("total: %d, visible: %d"):format(message.total, message.visible))
 	elseif message_id == hash("update_round_timer") then
 		update_round_timer(self, message.timeleft)
 	end

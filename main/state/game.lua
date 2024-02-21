@@ -10,7 +10,9 @@ local StateEnum = {
 		Row = "inventory_size_row",
 		Col = "inventory_size_col"
 	},
-	Settings = {
+	Level = {
+		MouseOverTileHash = "level_mouse_over_tile",
+		TileType = "level_tile_type",
 		TileSize = "settings_tile_size",
 		MaxRoundTimeSeconds = "settings_max_round_time_seconds"
 	},
@@ -20,6 +22,7 @@ local StateEnum = {
 }
 
 local game_state = {
+	[StateEnum.Physics.Gravity] = -1900,
 	[StateEnum.Player.MaxEnergy] = 5,
 	[StateEnum.Player.CurrentEnergy] = 5,
 	[StateEnum.Player.MaxSpeed] = 150,
@@ -27,9 +30,14 @@ local game_state = {
 	[StateEnum.Player.Coins] = 50,
 	[StateEnum.Inventory.Row] = 2,
 	[StateEnum.Inventory.Col] = 4,
-	[StateEnum.Settings.TileSize] = 64,
-	[StateEnum.Physics.Gravity] = -1900,
-	[StateEnum.Settings.MaxRoundTimeSeconds] = 5
+	[StateEnum.Level.TileSize] = 64,
+	[StateEnum.Level.MaxRoundTimeSeconds] = 60,
+	[StateEnum.Level.MouseOverTileHash] = nil,
+	[StateEnum.Level.TileType] = {
+		EMPTY = "empty",
+		DIRT = "dirt",
+		ORE = "ore"
+	},
 }
 
 function game_state.get_state_property(property)

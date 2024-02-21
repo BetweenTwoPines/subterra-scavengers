@@ -5,7 +5,7 @@ local group_obstacle = hash("ground")
 
 -- max speed right/left
 local max_speed = state.game_state.get_state_property(state.StateEnum.Player.MaxSpeed)
-local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Settings.TileSize)
+local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
 local gravity = state.game_state.get_state_property(state.StateEnum.Physics.Gravity)
 
 local max_upwards_speed = 500
@@ -16,6 +16,7 @@ local anim_walk_right = hash("player_right")
 local anim_walk_left = hash("player_left")
 
 function init(self)
+	print(msg.url())
 	defos.set_cursor_visible(false)
 	msg.post("#camera", "acquire_camera_focus")
 	msg.post("@render:", "use_camera_projection")

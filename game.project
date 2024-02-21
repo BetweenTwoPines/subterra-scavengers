@@ -12,8 +12,8 @@ game_binding = /input/game.input_bindingc
 use_accelerometer = 0
 
 [display]
-width = 1280
-height = 720
+width = 1136
+height = 640
 
 [script]
 shared_state = 1
@@ -30,4 +30,8 @@ input_method = HiddenInputField
 [physics]
 gravity_y = -1000.0
 scale = 0.01
+max_collision_object_count = 1024
+
+[sprite]
+max_count = 512
 

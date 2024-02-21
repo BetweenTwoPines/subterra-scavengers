@@ -1,0 +1,156 @@
+local state = require "main.state.game"
+local perlin = require "main.perlin"
+local LAYER1 = hash("layer1")
+
+local TILE_TYPE = state.game_state.get_state_property(state.StateEnum.Level.TileType)
+local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
+
+local WIDTH = math.floor(tonumber(sys.get_config("display.width")) / TILE_SIZE - 3)
+local HEIGHT = math.floor(tonumber(sys.get_config("display.height")) / TILE_SIZE - 2)
+local half_screen_width = math.floor(WIDTH / 2) + 1
+local half_screen_height = math.floor(HEIGHT / 2) + 1
+
+map = {}
+local viewport = {}
+local visible_tiles_count = 0
+local total_tiles_count = 0
+
+local function get_key(x, y)
+	return ("%d-%d"):format(x, y)
+end
+
+local function create_tile(x, y, key) 
+	local p = vmath.vector3(x * TILE_SIZE, y * TILE_SIZE, 0)
+	local id = factory.create("#tile_factory", p, nil, {key = x})
+	viewport[key] = {
+		id = id,
+		x = x,
+		y = y
+	}
+	
+	visible_tiles_count = visible_tiles_count + 1
+	msg.post("/gui#ui", "debug_tile_count", {total = total_tiles_count, visible = visible_tiles_count})
+end
+
+local function cleanup_outside_of_viewport(min_x, max_x, min_y, max_y) 
+	for key, entry in pairs(viewport) do
+		if entry.x > max_x or entry.x < min_x or entry.y > max_y or entry.y < min_y then
+			go.delete(entry.id, true)
+			viewport[key] = nil
+			visible_tiles_count = visible_tiles_count - 1
+			msg.post("/gui#ui", "debug_tile_count", {total = total_tiles_count, visible = visible_tiles_count})		
+		end
+	end
+end
+
+local function render_viewport(min_x, max_x, min_y, max_y)
+	for x = min_x, max_x, 1 do
+		for y = min_y, max_y, 1 do
+			local key = get_key(x, y)
+			if map[key].hitpoints > 0 and viewport[key] == nil then
+				create_tile(x, y, key)
+			end
+		end
+	end
+end
+
+local function update_level(tx, ty)
+	local max_y = 0
+	local min_y = ty - half_screen_height
+	local max_x = tx + half_screen_width
+	local min_x = tx - half_screen_width
+	if ty + half_screen_height < 0 then
+		max_y = ty + half_screen_height
+	end 
+	for x = min_x, max_x, 1 do
+		for y = min_y, max_y, 1 do
+			local key = get_key(x, y)
+			if map[key] == nil then
+				local tile_type = TILE_TYPE.DIRT
+				local hitpoints = 100
+				if math.random(-1, 1) > 0 then
+					tile_type = TILE_TYPE.EMPTY
+					hitpoints = 0
+				end
+				map[key] = {
+					tile_type = tile_type,
+					hitpoints = hitpoints
+				}
+				total_tiles_count = total_tiles_count + 1
+			end
+		end
+	end
+	render_viewport(min_x, max_x, min_y, max_y)
+	cleanup_outside_of_viewport(min_x, max_x, min_y, max_y)
+end
+
+function init(self)
+	pprint(msg.url())
+	perlin.init()
+	print(("widht: %d, height: %d"):format(WIDTH, HEIGHT))
+	update_level(0, 0)
+	self.previous_px = 0
+	self.previous_py = 0
+
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	local player = go.get_position("/player/player#player")
+	local px = player.x
+	local py = player.y
+
+	local tx = math.floor(px / TILE_SIZE)
+	local ty = math.floor(py / TILE_SIZE)
+	
+	local previous_tx = math.floor(self.previous_px / TILE_SIZE)
+	local previous_ty = math.floor(self.previous_py / TILE_SIZE)
+	
+	if tx ~= previous_tx or ty ~= previous_ty then
+		update_level(tx, ty)
+	end
+	
+	self.previous_px = px
+	self.previous_py = py
+end
+
+function fixed_update(self, dt)
+	-- This function is called if 'Fixed Update Frequency' is enabled in the Engine section of game.project
+	-- Can be coupled with fixed updates of the physics simulation if 'Use Fixed Timestep' is enabled in
+	-- Physics section of game.project
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("delete_tile") then
+		viewport[message.key] = nil
+	end
+	-- Add message-handling code here
+	-- Learn more: https://defold.com/manuals/message-passing/
+	-- Remove this function if not needed
+end
+
+function on_input(self, action_id, action)
+	-- Add input-handling code here. The game object this script is attached to
+	-- must have acquired input focus:
+	--
+	--    msg.post(".", "acquire_input_focus")
+	--
+	-- All mapped input bindings will be received. Mouse and touch input will
+	-- be received regardless of where on the screen it happened.
+	-- Learn more: https://defold.com/manuals/input/
+	-- Remove this function if not needed
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end
