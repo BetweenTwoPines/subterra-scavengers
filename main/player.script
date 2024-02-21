@@ -153,5 +153,5 @@ function on_input(self, action_id, action)
 	elseif action_id == hash("escape") then
 		msg.post("@system:", "exit", {code = 0})
 	end
-	msg.post("/crosshair", update_crosshair_position, { x = action.screen_x, y = action.screen_y })
+	msg.post("/crosshair", update_crosshair_position, { x = action.screen_x, y = action.screen_y, player_pos = go.get_position() })
 end
