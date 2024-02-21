@@ -1,6 +1,6 @@
 local state = require "main.state.game"
 
-local max_round_time = state.game_state.get_state_property(state.StateEnum.Settings.MaxRoundTimeSeconds)
+local max_round_time = state.game_state.get_state_property(state.StateEnum.Level.MaxRoundTimeSeconds)
 
 local function show(self, proxy)
 	if self.current_proxy then

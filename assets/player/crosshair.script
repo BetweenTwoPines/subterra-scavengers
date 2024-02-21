@@ -1,11 +1,9 @@
+local state = require "main.state.game"
 local rendercam = require "rendercam.rendercam"
 update_crosshair_position = hash("update_crosshair_position")
 
 function init(self)
-	--msg.post(".", "acquire_input_focus")
-	-- Add initialization code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
+
 end
 
 function final(self)
@@ -15,9 +13,8 @@ function final(self)
 end
 
 function update(self, dt)
-	-- Add update code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
+	-- reset active node
+	state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, nil)
 end
 
 function fixed_update(self, dt)
@@ -32,12 +29,12 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == update_crosshair_position then
 		local new_position = rendercam.screen_to_world_2d(message.x, message.y, false, 1)
-		--pprint(new_position)
 		go.set_position(new_position)
+	elseif message_id == hash("contact_point_response") then
+		if message.group == hash("ground") then
+			state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, message.other_id)
+		end
 	end
-	-- Add message-handling code here
-	-- Learn more: https://defold.com/manuals/message-passing/
-	-- Remove this function if not needed
 end
 
 function on_input(self, action_id, action)

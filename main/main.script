@@ -1,16 +1,12 @@
+local state = require "main.state.game"
 local perlin = require "main.perlin"
 local LAYER1 = hash("layer1")
 
-tileType = {
-	EMPTY = "empty",
-	DIRT = "dirt",
-	ORE = "ore"
-}
+local TILE_TYPE = state.game_state.get_state_property(state.StateEnum.Level.TileType)
+local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
 
-TILE_SIZE = 64
-
-local WIDTH = math.floor(tonumber(sys.get_config("display.width")) / TILE_SIZE)
-local HEIGHT = math.floor(tonumber(sys.get_config("display.height")) / TILE_SIZE)
+local WIDTH = math.floor(tonumber(sys.get_config("display.width")) / TILE_SIZE - 3)
+local HEIGHT = math.floor(tonumber(sys.get_config("display.height")) / TILE_SIZE - 2)
 local half_screen_width = math.floor(WIDTH / 2) + 1
 local half_screen_height = math.floor(HEIGHT / 2) + 1
 
@@ -25,7 +21,7 @@ end
 
 local function create_tile(x, y, key) 
 	local p = vmath.vector3(x * TILE_SIZE, y * TILE_SIZE, 0)
-	local id = factory.create("#tile_factory", p, nil)
+	local id = factory.create("#tile_factory", p, nil, {key = x})
 	viewport[key] = {
 		id = id,
 		x = x,
@@ -70,10 +66,10 @@ local function update_level(tx, ty)
 		for y = min_y, max_y, 1 do
 			local key = get_key(x, y)
 			if map[key] == nil then
-				local tile_type = tileType.DIRT
+				local tile_type = TILE_TYPE.DIRT
 				local hitpoints = 100
 				if math.random(-1, 1) > 0 then
-					tile_type = tileType.EMPTY
+					tile_type = TILE_TYPE.EMPTY
 					hitpoints = 0
 				end
 				map[key] = {
@@ -134,7 +130,6 @@ end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("delete_tile") then
-		go.delete(viewport[message.key].id, true)
 		viewport[message.key] = nil
 	end
 	-- Add message-handling code here

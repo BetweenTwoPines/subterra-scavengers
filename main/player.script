@@ -5,7 +5,7 @@ local group_obstacle = hash("ground")
 
 -- max speed right/left
 local max_speed = state.game_state.get_state_property(state.StateEnum.Player.MaxSpeed)
-local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Settings.TileSize)
+local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
 local gravity = state.game_state.get_state_property(state.StateEnum.Physics.Gravity)
 
 local max_upwards_speed = 500
