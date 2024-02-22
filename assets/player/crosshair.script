@@ -17,7 +17,7 @@ end
 function update(self, dt)
 	-- reset active node
 	-- state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, nil)
-	-- state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, nil)
+
 end
 
 function fixed_update(self, dt)
