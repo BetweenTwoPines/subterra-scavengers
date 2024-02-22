@@ -2,6 +2,8 @@ local state = require "main.state.game"
 local rendercam = require "rendercam.rendercam"
 update_crosshair_position = hash("update_crosshair_position")
 
+local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
+
 function init(self)
 
 end
@@ -26,9 +28,31 @@ function fixed_update(self, dt)
 	-- Remove this function if not needed
 end
 
+
+
 function on_message(self, message_id, message, sender)
 	if message_id == update_crosshair_position then
+		local player_pos = message.player_pos
+		-- Convert the mouse screen coordinates to world coordinates
 		local new_position = rendercam.screen_to_world_2d(message.x, message.y, false, 1)
+
+		-- Calculate the vector from the player to the new position
+		local dx = new_position.x - player_pos.x
+		local dy = new_position.y - player_pos.y
+		
+		-- Calculate the distance between the new position and the player
+		local distance = math.sqrt(dx * dx + dy * dy)
+
+		-- If the distance is greater than TILE_SIZE pixels, constrain the position
+		if distance > TILE_SIZE then
+			-- Calculate the normalized direction vector
+			local norm_dx = dx / distance
+			local norm_dy = dy / distance
+			-- Set the new position to be on the edge of the 64 pixel radius circle around the player
+			new_position.x = player_pos.x + TILE_SIZE * norm_dx
+			new_position.y = player_pos.y + TILE_SIZE * norm_dy
+		end
+
 		go.set_position(new_position)
 	elseif message_id == hash("contact_point_response") then
 		if message.group == hash("ground") then
