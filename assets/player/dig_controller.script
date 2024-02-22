@@ -23,6 +23,9 @@ end
 function on_input(self, action_id, action)
 	if action_id == hash("interact") and action.pressed then
 		local availableEnergy = state.game_state.get_state_property(state.StateEnum.Player.CurrentEnergy)
+		if availableEnergy <= 0 then
+			return
+		end
 		local hoveredOverNode = state.game_state.get_state_property(state.StateEnum.Level.MouseOverTileHash)
 		if availableEnergy <= 0 or hoveredOverNode == nil then
 			return
