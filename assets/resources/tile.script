@@ -1,6 +1,8 @@
+local state = require "main.state.game"
 go.property("type", tileType.EMPTY)
 
 function init(self)
+	go.set("#selected_overlay", "tint", vmath.vector4(1, 1, 1, 0))
 	-- sprite.play_flipbook("", id)
 	-- Add initialization code here
 	-- Learn more: https://defold.com/manuals/script/
@@ -29,6 +31,18 @@ function fixed_update(self, dt)
 end
 
 function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if message.other_group == hash("crosshair") then
+			if message.enter then
+				state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, go.get_id())
+				go.set("#selected_overlay", "tint", vmath.vector4(1, 1, 1, .5))
+			else
+				go.set("#selected_overlay", "tint", vmath.vector4(1, 1, 1, 0))
+			end
+		else
+			state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, nil)
+		end
+	end
 	-- Add message-handling code here
 	-- Learn more: https://defold.com/manuals/message-passing/
 	-- Remove this function if not needed

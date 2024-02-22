@@ -85,7 +85,6 @@ local function update_level(tx, ty)
 end
 
 function init(self)
-	pprint(msg.url())
 	perlin.init()
 	print(("widht: %d, height: %d"):format(WIDTH, HEIGHT))
 	update_level(0, 0)

@@ -16,7 +16,7 @@ end
 
 function update(self, dt)
 	-- reset active node
-	state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, nil)
+	-- state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, nil)
 end
 
 function fixed_update(self, dt)
@@ -54,9 +54,13 @@ function on_message(self, message_id, message, sender)
 		end
 
 		go.set_position(new_position)
-	elseif message_id == hash("contact_point_response") then
-		if message.group == hash("ground") then
-			state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, message.other_id)
+	elseif message_id == hash("trigger_response") then
+		if message.other_group == hash("ground") then
+			-- if message.enter then
+			-- 	state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, message.other_id)
+			-- else 
+			-- 	state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, nil)
+			-- end
 		end
 	end
 end
