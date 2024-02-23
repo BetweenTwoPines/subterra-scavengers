@@ -16,32 +16,63 @@ function init(self)
 		sprite.play_flipbook("#sprite", ore_types[self.ore_type_id])
 	end
 	
-	self.velocity = vmath.vector3(0, 500, 0)
+	self.velocity = vmath.vector3(1, 500, 0)
 	self.first_render = true
-	self.grounded = false
+	self.random_x_axis_acceleration = math.random(-1, 1) * initial_ore_drop_velocity
+	self.correction = vmath.vector3()
 end
 
 function update(self, dt)
-	if not self.grounded then
-		-- Apply gravity to the velocity if the object is not grounded
-		self.velocity.y = self.velocity.y + gravity * dt
+	-- Apply gravity to the velocity if the object is not grounded
+	self.velocity.y = self.velocity.y + gravity * dt
 
-		-- Update the position of the game object
-		local position = go.get_position()
-		position = position + self.velocity * dt
-		go.set_position(position)
+	-- Randomize the x direction of travel
+	if self.velocity.x > 0 then
+		self.velocity.x = self.random_x_axis_acceleration
 	end
+
+	-- Update the position of the game object
+	local position = go.get_position()
+	position = position + self.velocity * dt
+	go.set_position(position)
+	
+	-- reset
 	self.grounded = false
+	self.correction = vmath.vector3()
+end
+
+local function handle_obstacle_contact(self, normal, distance)
+	if distance > 0 then
+		-- First, project the accumulated correction onto
+		-- the penetration vector
+		local proj = vmath.project(self.correction, normal * distance)
+		if proj < 1 then
+			-- Only care for projections that does not overshoot.
+			local comp = (distance - distance * proj) * normal
+			-- Apply compensation
+			go.set_position(go.get_position() + comp)
+			-- Accumulate correction done
+			self.correction = self.correction + comp
+		end
+	end
 end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("contact_point_response") then
 		if message.group == hash("ground") then
+			-- HACK: For some reason when we first spawn this object, it triggers collison event which causes jittering in gravity
+			-- SKIP first emission
 			if not self.first_render then
-				local newpos = go.get_position() + message.normal * message.distance
-				go.set_position(newpos)
-				self.velocity.y = 0
-				self.grounded = true
+				handle_obstacle_contact(self, message.normal, message.distance)
+
+				if math.abs(message.normal.x) > 0.7 then
+					self.velocity.x = 0
+				end
+
+				if message.normal.y > 0.7 then
+					self.velocity.y = 0
+					self.velocity.x = 0
+				end
 			else
 				self.first_render = false
 			end
