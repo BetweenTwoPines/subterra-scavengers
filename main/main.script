@@ -10,10 +10,10 @@ local HEIGHT = math.floor(tonumber(sys.get_config("display.height")) / TILE_SIZE
 local half_screen_width = math.floor(WIDTH / 2) + 1
 local half_screen_height = math.floor(HEIGHT / 2) + 1
 
-map = {}
 local viewport = {}
 local visible_tiles_count = 0
 local total_tiles_count = 0
+
 
 local function get_key(x, y)
 	return ("%d-%d"):format(x, y)
@@ -47,7 +47,7 @@ local function render_viewport(min_x, max_x, min_y, max_y)
 	for x = min_x, max_x, 1 do
 		for y = min_y, max_y, 1 do
 			local key = get_key(x, y)
-			if map[key].hitpoints > 0 and viewport[key] == nil then
+			if state.game_state[state.StateEnum.Level.Tiles][key].hitpoints > 0 and viewport[key] == nil then
 				create_tile(x, y, key)
 			end
 		end
@@ -65,14 +65,14 @@ local function update_level(tx, ty)
 	for x = min_x, max_x, 1 do
 		for y = min_y, max_y, 1 do
 			local key = get_key(x, y)
-			if map[key] == nil then
+			if state.game_state[state.StateEnum.Level.Tiles][key] == nil then
 				local tile_type = TILE_TYPE.DIRT
 				local hitpoints = 100
 				if math.random(-1, 1) > 0 then
 					tile_type = TILE_TYPE.EMPTY
 					hitpoints = 0
 				end
-				map[key] = {
+				state.game_state[state.StateEnum.Level.Tiles][key] = {
 					tile_type = tile_type,
 					hitpoints = hitpoints
 				}
