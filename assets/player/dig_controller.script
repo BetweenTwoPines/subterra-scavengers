@@ -28,15 +28,11 @@ function on_input(self, action_id, action)
 		local key = get_key(pos.x / TILE_SIZE, pos.y / TILE_SIZE)
 
 		if hoveredOverNode then
-			print("hit detected---------------")
-			pprint(key)
-			pprint(map[key])
 			local hitpoints = map[key].hitpoints - 50
 			map[key].hitpoints = hitpoints
 			if hitpoints <= 0 then
 				msg.post("/main#main", "delete_tile", { key = key})
 				go.delete(state.game_state.get_state_property(state.StateEnum.Level.MouseOverTileHash))
-				--  empty tiles dont drop anything
 				if map[key].tile_type ~= TILE_TYPE.EMPTY then
 					factory.create("/factory#ore_factory", pos, nil, {ore_type_id = 1})
 				end
