@@ -50,7 +50,9 @@ local perlin = {
 }
 
 function perlin.init()
+    math.randomseed(os.time())
     for i=1,perlin.size do
+        perlin.permutation[i] = math.random(1, 256) 
         perlin.p[i] = perlin.permutation[i]
         perlin.p[255+i] = perlin.p[i]
     end
