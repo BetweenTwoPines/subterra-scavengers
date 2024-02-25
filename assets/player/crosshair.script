@@ -54,14 +54,6 @@ function on_message(self, message_id, message, sender)
 		end
 
 		go.set_position(new_position)
-	elseif message_id == hash("trigger_response") then
-		if message.other_group == hash("ground") then
-			-- if message.enter then
-			-- 	state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, message.other_id)
-			-- else 
-			-- 	state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, nil)
-			-- end
-		end
 	end
 end
 
