@@ -12,9 +12,7 @@ local gravity = state.game_state.get_state_property(state.StateEnum.Physics.Grav
 local initial_ore_drop_velocity = 100
 
 function init(self)
-	if self.properties then
-		sprite.play_flipbook("#sprite", ore_types[self.ore_type_id])
-	end
+	-- sprite.play_flipbook("#sprite", ore_types[self.ore_type_id])
 	
 	self.velocity = vmath.vector3(1, 500, 0)
 	self.first_render = true

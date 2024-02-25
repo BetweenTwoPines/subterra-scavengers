@@ -2,7 +2,7 @@ local state = require "main.state.game"
 local perlin = require "main.perlin"
 local LAYER1 = hash("layer1")
 
-local TILE_TYPE = state.game_state.get_state_property(state.StateEnum.Level.TileType)
+local TILE_TYPE = state.TileTypeEnum
 local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
 
 local WIDTH = math.floor(tonumber(sys.get_config("display.width")) / TILE_SIZE - 3)
@@ -21,7 +21,7 @@ end
 
 local function create_tile(x, y, key) 
 	local p = vmath.vector3(x * TILE_SIZE, y * TILE_SIZE, 0)
-	local id = factory.create("#tile_factory", p, nil, {key = x})
+	local id = factory.create("/tile_factory#tile_factory", p, nil, { tile_type = state.game_state[state.StateEnum.Level.Tiles][key].tile_type})
 	viewport[key] = {
 		id = id,
 		x = x,
@@ -68,15 +68,22 @@ local function update_level(tx, ty)
 			if state.game_state[state.StateEnum.Level.Tiles][key] == nil then
 				local tile_type = TILE_TYPE.DIRT
 				local hitpoints = 100
-				if math.random(-1, 1) > 0 then
+				local random = math.random(0, 3)
+				if random == 0 then
 					tile_type = TILE_TYPE.EMPTY
 					hitpoints = 0
+				elseif random == 1 then
+					tile_type = TILE_TYPE.ORE
+					hitpoints = 200
 				end
-				state.game_state[state.StateEnum.Level.Tiles][key] = {
-					tile_type = tile_type,
-					hitpoints = hitpoints
-				}
-				total_tiles_count = total_tiles_count + 1
+
+				if tyle_type ~= TILE_TYPE.EMPTY then				
+					state.game_state[state.StateEnum.Level.Tiles][key] = {
+						tile_type = tile_type,
+						hitpoints = hitpoints
+					}
+					total_tiles_count = total_tiles_count + 1
+				end
 			end
 		end
 	end

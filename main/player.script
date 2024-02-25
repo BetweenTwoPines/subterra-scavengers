@@ -2,7 +2,6 @@ local state = require "main.state.game"
 local rendercam = require "rendercam.rendercam"
 local msg_contact_point_response = hash("contact_point_response")
 local group_obstacle = hash("ground")
-
 -- max speed right/left
 local max_speed = state.game_state.get_state_property(state.StateEnum.Player.MaxSpeed)
 local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)

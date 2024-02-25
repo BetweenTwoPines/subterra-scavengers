@@ -22,6 +22,17 @@ local StateEnum = {
 	}
 }
 
+local TileTypeEnum = {
+	EMPTY = 0,
+	DIRT = 1,
+	ORE = 2
+}
+
+local TileSpriteAnimations = {
+	[TileTypeEnum.DIRT] = "dirt",
+	[TileTypeEnum.ORE] = "ore",
+}
+
 local game_state = {
 	[StateEnum.Physics.Gravity] = -1900,
 	[StateEnum.Player.MaxEnergy] = 50,
@@ -34,11 +45,6 @@ local game_state = {
 	[StateEnum.Level.TileSize] = 64,
 	[StateEnum.Level.MaxRoundTimeSeconds] = 180,
 	[StateEnum.Level.MouseOverTileHash] = nil,
-	[StateEnum.Level.TileType] = {
-		EMPTY = "empty",
-		DIRT = "dirt",
-		ORE = "ore"
-	},
 	[StateEnum.Level.Tiles] = {}
 }
 
@@ -51,4 +57,4 @@ function game_state.set_state_property(property, newValue)
 	return newValue
 end
 
-return { StateEnum = StateEnum, game_state = game_state }
+return { StateEnum = StateEnum, game_state = game_state, TileTypeEnum = TileTypeEnum, TileSpriteAnimations = TileSpriteAnimations }
