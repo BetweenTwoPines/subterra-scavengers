@@ -124,9 +124,8 @@ local function walk(self, direction)
 		self.facing_direction = direction
 	end
 	if self.wall_contact ~= true then
-		-- notify background to move with player
-		msg.post("/sky#sky", "move_background", { direction = self.facing_direction * -1 })
-		msg.post("/treeline#treeline", "move_background", { direction = self.facing_direction * -1 })
+		-- apply parralax effect to background
+		msg.post("/background/scroller#background", "move_background", { direction = self.facing_direction * -1 })
 	end
 	-- update velocity and use different velocity on ground
 	self.velocity.x = max_speed * direction
