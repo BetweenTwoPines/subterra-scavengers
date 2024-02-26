@@ -43,8 +43,8 @@ embedded_components {
   "    count: 3\n"
   "    id: \"\"\n"
   "  }\n"
-  "  data: 32.0\n"
-  "  data: 32.0\n"
+  "  data: 31.5\n"
+  "  data: 31.5\n"
   "  data: 10.0\n"
   "}\n"
   "linear_damping: 0.0\n"
@@ -79,6 +79,29 @@ embedded_components {
     x: 0.0
     y: 0.0
     z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+}
+embedded_components {
+  id: "selected_overlay"
+  type: "sprite"
+  data: "default_animation: \"selected_tile_overlay\"\n"
+  "material: \"/builtins/materials/sprite.material\"\n"
+  "blend_mode: BLEND_MODE_ALPHA\n"
+  "textures {\n"
+  "  sampler: \"texture_sampler\"\n"
+  "  texture: \"/assets/level.tilesource\"\n"
+  "}\n"
+  ""
+  position {
+    x: 0.0
+    y: 0.0
+    z: 1.0
   }
   rotation {
     x: 0.0
