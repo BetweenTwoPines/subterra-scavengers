@@ -68,13 +68,16 @@ local function update_level(tx, ty)
 			if state.game_state[state.StateEnum.Level.Tiles][key] == nil then
 				local tile_type = TILE_TYPE.DIRT
 				local hitpoints = 100
-				local random = math.random(0, 3)
-				if random == 0 then
-					tile_type = TILE_TYPE.EMPTY
-					hitpoints = 0
-				elseif random == 1 then
+				local n = perlin.noise((tx + x) / 10, (ty + y) / 10, 0.3)
+				if n < -0.29 then
 					tile_type = TILE_TYPE.ORE
 					hitpoints = 200
+				elseif n < -0.2 then
+					tile_type = TILE_TYPE.EMPTY
+					hitpoints = 0
+				elseif n < 0.05 then
+					tile_type = TILE_TYPE.DIRT
+					hitpoints = 100
 				end
 
 				if tyle_type ~= TILE_TYPE.EMPTY then				
