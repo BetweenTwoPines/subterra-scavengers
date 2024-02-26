@@ -3,7 +3,7 @@ local state = require "main.state.game"
 
 local max_energy = state.game_state.get_state_property(state.StateEnum.Player.MaxEnergy)
 local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
-local TILE_TYPE = state.game_state.get_state_property(state.StateEnum.Level.TileType)
+local TILE_TYPE = state.TileTypeEnum
 
 local function get_key(x, y)
 	return ("%d-%d"):format(x, y)
