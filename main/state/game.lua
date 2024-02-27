@@ -1,4 +1,6 @@
-local StateEnum = {
+local STATE = {}
+
+STATE.StateEnum = {
 	Player = {
 		MaxEnergy = "player_max_energy",
 		CurrentEnergy = "player_current_energy",
@@ -8,7 +10,13 @@ local StateEnum = {
 	},
 	Inventory = {
 		Row = "inventory_size_row",
-		Col = "inventory_size_col"
+		Col = "inventory_size_col",
+		MaxWeight = "inventory_max_weight",
+		Weight = "inventory_weight",
+		Items = {
+			Resources = "inventory_items_resources"
+			-- TODO Items
+		}
 	},
 	Level = {
 		Tiles = "level_tiles",
@@ -22,39 +30,46 @@ local StateEnum = {
 	}
 }
 
-local TileTypeEnum = {
+STATE.TileTypeEnum = {
 	EMPTY = 0,
 	DIRT = 1,
 	ORE = 2
 }
 
-local TileSpriteAnimations = {
-	[TileTypeEnum.DIRT] = "dirt",
-	[TileTypeEnum.ORE] = "ore",
+STATE.TileSpriteAnimations = {
+	[STATE.TileTypeEnum.DIRT] = "dirt",
+	[STATE.TileTypeEnum.ORE] = "ore",
 }
 
-local game_state = {
-	[StateEnum.Physics.Gravity] = -1900,
-	[StateEnum.Player.MaxEnergy] = 50,
-	[StateEnum.Player.CurrentEnergy] = 5,
-	[StateEnum.Player.MaxSpeed] = 150,
-	[StateEnum.Player.MaxHealth] = 100,
-	[StateEnum.Player.Coins] = 50,
-	[StateEnum.Inventory.Row] = 2,
-	[StateEnum.Inventory.Col] = 4,
-	[StateEnum.Level.TileSize] = 64,
-	[StateEnum.Level.MaxRoundTimeSeconds] = 180,
-	[StateEnum.Level.MouseOverTileHash] = nil,
-	[StateEnum.Level.Tiles] = {}
+STATE.ResourceWeightMap = {
+	[STATE.TileTypeEnum.ORE] = 5
 }
 
-function game_state.get_state_property(property)
-	return game_state[property]
+STATE.game_state = {
+	[STATE.StateEnum.Physics.Gravity] = -1900,
+	[STATE.StateEnum.Player.MaxEnergy] = 50,
+	[STATE.StateEnum.Player.CurrentEnergy] = 5,
+	[STATE.StateEnum.Player.MaxSpeed] = 150,
+	[STATE.StateEnum.Player.MaxHealth] = 100,
+	[STATE.StateEnum.Player.Coins] = 50,
+	[STATE.StateEnum.Inventory.Row] = 2,
+	[STATE.StateEnum.Inventory.Col] = 4,
+	[STATE.StateEnum.Inventory.Items.Resources] = {},
+	[STATE.StateEnum.Inventory.Weight] = 0,
+	[STATE.StateEnum.Inventory.MaxWeight] = 50,
+	[STATE.StateEnum.Level.TileSize] = 64,
+	[STATE.StateEnum.Level.MaxRoundTimeSeconds] = 180,
+	[STATE.StateEnum.Level.MouseOverTileHash] = nil,
+	[STATE.StateEnum.Level.Tiles] = {}
+}
+
+function STATE.game_state.get_state_property(property)
+	return STATE.game_state[property]
 end
 
-function game_state.set_state_property(property, newValue)
-	game_state[property] = newValue
+function STATE.game_state.set_state_property(property, newValue)
+	STATE.game_state[property] = newValue
 	return newValue
 end
 
-return { StateEnum = StateEnum, game_state = game_state, TileTypeEnum = TileTypeEnum, TileSpriteAnimations = TileSpriteAnimations }
+return STATE

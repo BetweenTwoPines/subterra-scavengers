@@ -1,9 +1,16 @@
+local state = require "main.state.game"
 function init(self)
 	-- Save energy bar node so we can scale it based on players energy
 	self.player_energy_node = gui.get_node("player_energy")
 	-- Remember initial width of the node so we can reset it back to it when energy resets
 	self.energy_bar_intial_scale = gui.get_scale(self.player_energy_node).x
 	-- Total possible energy user has. can be increased based on skills, perks, etc.
+end
+
+function update(self)
+	-- TODO: for now only logs count of TileTypeEnum.ORE
+	gui.set_text(gui.get_node("debug_inventory"),
+		("Resources: %d, weight: %d"):format(state.game_state[state.StateEnum.Inventory.Items.Resources][2] or 0, state.game_state[state.StateEnum.Inventory.Weight]))
 end
 
 local function update_energy_bar(self, energyBarScaleRatio)
