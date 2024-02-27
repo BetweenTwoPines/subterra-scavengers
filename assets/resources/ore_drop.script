@@ -12,8 +12,6 @@ local gravity = state.game_state.get_state_property(state.StateEnum.Physics.Grav
 local initial_ore_drop_velocity = 100
 
 function init(self)
-	-- sprite.play_flipbook("#sprite", ore_types[self.ore_type_id])
-	
 	self.velocity = vmath.vector3(1, 500, 0)
 	self.first_render = true
 	self.random_x_axis_acceleration = math.random(-1, 1) * initial_ore_drop_velocity
@@ -55,6 +53,23 @@ local function handle_obstacle_contact(self, normal, distance)
 	end
 end
 
+local function pickup(ore_type_id)
+	local inventory_resources = state.game_state[state.StateEnum.Inventory.Items.Resources]
+
+	-- Check if the ore_type_id already exists in the inventory
+	if inventory_resources[ore_type_id] then
+		-- Ore type exists, increment its quantity
+		inventory_resources[ore_type_id] = inventory_resources[ore_type_id] + 1
+	else
+		-- Ore type does not exist, init with 1
+		inventory_resources[ore_type_id] = 1
+	end
+	-- update total weight of inventory
+	state.game_state[state.StateEnum.Inventory.Weight] = state.game_state[state.StateEnum.Inventory.Weight] + state.ResourceWeightMap[ore_type_id]
+	-- update number of resources
+	state.game_state[state.StateEnum.Inventory.Items.Resources] = inventory_resources
+end
+
 function on_message(self, message_id, message, sender)
 	if message_id == hash("contact_point_response") then
 		if message.group == hash("ground") then
@@ -74,6 +89,9 @@ function on_message(self, message_id, message, sender)
 			else
 				self.first_render = false
 			end
+		elseif message.group == hash("player") then
+			pickup(self.ore_type_id)
+			go.delete()
 		end
 	end
 end

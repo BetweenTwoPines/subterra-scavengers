@@ -45,7 +45,7 @@ function on_input(self, action_id, action)
 				go.delete(state.game_state.get_state_property(state.StateEnum.Level.MouseOverTileHash))
 				--  empty tiles dont drop anything
 				if state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.ORE then
-					factory.create("/factory#ore_factory", pos, nil, {ore_type_id = 1})
+					factory.create("/factory#ore_factory", pos, nil, {ore_type_id = state.game_state[state.StateEnum.Level.Tiles][key].tile_type})
 				end
 			end
 		end

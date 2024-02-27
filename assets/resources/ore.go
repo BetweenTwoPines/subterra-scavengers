@@ -51,6 +51,7 @@ embedded_components {
   "restitution: 0.5\n"
   "group: \"ore\"\n"
   "mask: \"ground\"\n"
+  "mask: \"player\"\n"
   "embedded_collision_shape {\n"
   "  shapes {\n"
   "    shape_type: TYPE_SPHERE\n"
