@@ -24,7 +24,8 @@ function update(self, dt)
 	-- Start the timer when round is loaded
 	if self.timer > 0 and self.round_loaded then
 		self.timer = self.timer - dt
-		if self.current_proxy then
+		-- Only update time when the actual level is loaded
+		if self.current_proxy and self.current_proxy.fragment == hash("levelproxy")  then
 			msg.post("main:/gui#ui", "update_round_timer", {timeleft = self.timer})
 		end
 		if self.timer <= 0 then
@@ -40,6 +41,8 @@ function on_message(self, message_id, message, sender)
 	if message_id == hash("show_menu") then
 		show(self, "#menuproxy")
 	elseif message_id == hash("load_level") then
+		state.reset_player_stats()
+		self.timer = max_round_time
 		show(self, "#levelproxy")
 		self.round_loaded = true
 	elseif message_id == hash("load_hub") then
