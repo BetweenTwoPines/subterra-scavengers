@@ -5,6 +5,7 @@ STATE.StateEnum = {
 		MaxEnergy = "player_max_energy",
 		CurrentEnergy = "player_current_energy",
 		MaxSpeed = "player_max_speed",
+		CurrentHealth = "player_current_health",
 		MaxHealth = "player_max_health",
 		Coins = "player_coins"
 	},
@@ -48,9 +49,10 @@ STATE.ResourceWeightMap = {
 STATE.game_state = {
 	[STATE.StateEnum.Physics.Gravity] = -1900,
 	[STATE.StateEnum.Player.MaxEnergy] = 50,
-	[STATE.StateEnum.Player.CurrentEnergy] = 5,
+	[STATE.StateEnum.Player.CurrentEnergy] = 50,
 	[STATE.StateEnum.Player.MaxSpeed] = 150,
 	[STATE.StateEnum.Player.MaxHealth] = 100,
+	[STATE.StateEnum.Player.CurrentHealth] = 100,
 	[STATE.StateEnum.Player.Coins] = 50,
 	[STATE.StateEnum.Inventory.Row] = 2,
 	[STATE.StateEnum.Inventory.Col] = 4,
@@ -62,6 +64,12 @@ STATE.game_state = {
 	[STATE.StateEnum.Level.MouseOverTileHash] = nil,
 	[STATE.StateEnum.Level.Tiles] = {}
 }
+
+-- resets player stats for each round
+function STATE.reset_player_stats()
+	STATE.game_state[STATE.StateEnum.Player.CurrentEnergy] = STATE.game_state[STATE.StateEnum.Player.MaxEnergy]
+	STATE.game_state[STATE.StateEnum.Player.CurrentHealth] = STATE.game_state[STATE.StateEnum.Player.MaxHealth]
+end
 
 function STATE.game_state.get_state_property(property)
 	return STATE.game_state[property]

@@ -15,7 +15,6 @@ local anim_walk_right = hash("player_right")
 local anim_walk_left = hash("player_left")
 
 function init(self)
-	print(msg.url())
 	defos.set_cursor_visible(false)
 	msg.post("#camera", "acquire_camera_focus")
 	msg.post("@render:", "use_camera_projection")
@@ -30,6 +29,10 @@ function init(self)
   
 	-- the currently playing animation
 	self.currentAnimation = nil
+
+	self.fall_start_height = nil -- Tracks the height at which the player starts falling
+	self.fall_damage_height = 80 -- The fall height threshold for taking damage
+	self.is_falling = false
 end
 
 local function play_animation(self, anim)
@@ -60,6 +63,18 @@ function final(self)
 	msg.post(".", "release_input_focus")
 end
 
+local function apply_damage(self, fall_distance)
+	-- 1 damage unit per 10 pixels fallen beyond the threshold
+	local fall_damage = (fall_distance - self.fall_damage_height) / 10
+	local newHealth = state.game_state[state.StateEnum.Player.CurrentHealth] - fall_damage
+	if newHealth <= 0 then
+		-- You are dead
+		msg.post("proxy:/controller#controller", "show_menu")
+	else
+		state.game_state[state.StateEnum.Player.CurrentHealth] = newHealth
+	end
+end
+
 function update(self, dt)
 	-- apply gravity
 	self.velocity.y = self.velocity.y + gravity * dt
@@ -68,6 +83,20 @@ function update(self, dt)
 	local pos = go.get_position()
 	pos = pos + self.velocity * dt
 	go.set_position(pos)
+
+	if not self.ground_contact and self.velocity.y < 0 then -- The player is in the air and moving downwards
+		if not self.is_falling then -- The fall has just started
+			self.fall_start_height = go.get_position().y
+			self.is_falling = true
+		end
+	elseif self.ground_contact and self.is_falling then -- The player has landed
+		local fall_distance = self.fall_start_height - go.get_position().y
+		if fall_distance >= self.fall_damage_height then
+			-- local damage = calculate_fall_damage(self, fall_distance)
+			apply_damage(self, fall_distance)
+		end
+		self.is_falling = false
+	end
 
 	-- update player animation based its state
 	update_animations(self)

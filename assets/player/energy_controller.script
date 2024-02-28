@@ -13,8 +13,6 @@ local function updateEnergy(self, changeBy)
 end
 
 function init(self)
-	state.game_state.set_state_property(state.StateEnum.Player.CurrentEnergy, max_energy)
-	
 	timer.delay(energy_regen_interval_in_seconds, true, function(self) 
 		updateEnergy(self, 1)
 	end)
