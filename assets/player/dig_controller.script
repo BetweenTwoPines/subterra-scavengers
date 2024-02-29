@@ -44,9 +44,32 @@ function on_input(self, action_id, action)
 				msg.post("/main#main", "delete_tile", { key = key})
 				go.delete(state.game_state.get_state_property(state.StateEnum.Level.MouseOverTileHash))
 				--  empty tiles dont drop anything
-				if state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.ORE then
+				if state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.IRON_ORE_BROKEN_4 or state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.GOLD_ORE_BROKEN_4 then
 					factory.create("/factory#ore_factory", pos, nil, {ore_type_id = state.game_state[state.StateEnum.Level.Tiles][key].tile_type})
 				end
+			else
+				local new_sprite
+				if state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.IRON_ORE then 
+					new_sprite = TILE_TYPE.IRON_ORE_BROKEN_2
+				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.IRON_ORE_BROKEN_2 then
+					new_sprite = TILE_TYPE.IRON_ORE_BROKEN_3
+				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.IRON_ORE_BROKEN_3 then 
+					new_sprite = TILE_TYPE.IRON_ORE_BROKEN_4
+				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.GOLD_ORE then
+					new_sprite = TILE_TYPE.GOLD_ORE_BROKEN_2
+				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.GOLD_ORE_BROKEN_2 then
+					new_sprite = TILE_TYPE.GOLD_ORE_BROKEN_3
+				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.GOLD_ORE_BROKEN_3 then
+					new_sprite = TILE_TYPE.GOLD_ORE_BROKEN_4
+				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.DIRT then
+					new_sprite = TILE_TYPE.DIRT_BROKEN_2
+				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.DIRT_BROKEN_2 then
+					new_sprite = TILE_TYPE.DIRT_BROKEN_3
+				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.DIRT_BROKEN_3 then
+					new_sprite = TILE_TYPE.DIRT_BROKEN_4
+				end
+				state.game_state[state.StateEnum.Level.Tiles][key].tile_type = new_sprite
+				msg.post(state.game_state[state.StateEnum.Level.Tiles][key].id, "update_tile_sprite", { sprite = new_sprite})
 			end
 		end
 	end

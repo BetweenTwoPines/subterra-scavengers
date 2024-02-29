@@ -41,16 +41,37 @@ STATE.InventoryTypeEnum = {
 STATE.TileTypeEnum = {
 	EMPTY = 0,
 	DIRT = 1,
-	ORE = 2
+	IRON_ORE = 2,
+	GOLD_ORE = 3,
+	DIRT_BROKEN_2 = 12,
+	DIRT_BROKEN_3 = 13,
+	DIRT_BROKEN_4 = 14,
+	IRON_ORE_BROKEN_2 = 22,
+	IRON_ORE_BROKEN_3 = 23,
+	IRON_ORE_BROKEN_4 = 24,
+	GOLD_ORE_BROKEN_2 = 32,
+	GOLD_ORE_BROKEN_3 = 33,
+	GOLD_ORE_BROKEN_4 = 34,
 }
 
 STATE.TileSpriteAnimations = {
-	[STATE.TileTypeEnum.DIRT] = "dirt",
-	[STATE.TileTypeEnum.ORE] = "ore",
+	[STATE.TileTypeEnum.DIRT] = "dirt-1",
+	[STATE.TileTypeEnum.DIRT_BROKEN_2] = "dirt-2",
+	[STATE.TileTypeEnum.DIRT_BROKEN_3] = "dirt-3",
+	[STATE.TileTypeEnum.DIRT_BROKEN_4] = "dirt-4",
+	[STATE.TileTypeEnum.IRON_ORE] = "iron-ore-1",
+	[STATE.TileTypeEnum.IRON_ORE_BROKEN_2] = "iron-ore-2",
+	[STATE.TileTypeEnum.IRON_ORE_BROKEN_3] = "iron-ore-3",
+	[STATE.TileTypeEnum.IRON_ORE_BROKEN_4] = "iron-ore-4",
+	[STATE.TileTypeEnum.GOLD_ORE] = "gold-ore-1",
+	[STATE.TileTypeEnum.GOLD_ORE_BROKEN_2] = "gold-ore-2",
+	[STATE.TileTypeEnum.GOLD_ORE_BROKEN_3] = "gold-ore-3",
+	[STATE.TileTypeEnum.GOLD_ORE_BROKEN_4] = "gold-ore-4",
 }
 
 STATE.ResourceWeightMap = {
-	[STATE.TileTypeEnum.ORE] = 5
+	[STATE.TileTypeEnum.IRON_ORE] = 5,
+	[STATE.TileTypeEnum.GOLD_ORE] = 10
 }
 
 STATE.game_state = {
@@ -91,3 +112,5 @@ function STATE.game_state.set_state_property(property, newValue)
 end
 
 return STATE
+
+

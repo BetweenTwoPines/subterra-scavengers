@@ -1,5 +1,6 @@
 local state = require "main.state.game"
 go.property("tile_type", 0)
+go.property("key", hash(""))
 
 function init(self)
 	go.set("#selected_overlay", "tint", vmath.vector4(1, 1, 1, 0))
@@ -24,5 +25,7 @@ function on_message(self, message_id, message, sender)
 		if message.other_group == hash("crosshair") then
 			state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, go.get_id())
 		end
+	elseif message_id == hash("update_tile_sprite") then
+		sprite.play_flipbook("#sprite", state.TileSpriteAnimations[message.sprite])
 	end
 end
