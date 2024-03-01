@@ -26,6 +26,10 @@ key_trigger {
   input: KEY_1
   action: "first_belt_tool"
 }
+key_trigger {
+  input: KEY_TAB
+  action: "toggle_inventory"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_LEFT
   action: "interact"
