@@ -19,7 +19,8 @@ STATE.StateEnum = {
 		Items = {
 			Resources = "inventory_items_resources"
 			-- TODO Items
-		}
+		},
+		Type = "type"
 	},
 	Level = {
 		Tiles = "level_tiles",
@@ -31,6 +32,10 @@ STATE.StateEnum = {
 	Physics = {
 		Gravity = "physics_gravity"
 	}
+}
+
+STATE.InventoryTypeEnum = {
+	POUCH = 0,
 }
 
 STATE.TileTypeEnum = {
@@ -63,6 +68,7 @@ STATE.game_state = {
 	[STATE.StateEnum.Inventory.Items.Resources] = {},
 	[STATE.StateEnum.Inventory.Weight] = 0,
 	[STATE.StateEnum.Inventory.MaxWeight] = 50,
+	[STATE.StateEnum.Inventory.Type] = STATE.InventoryTypeEnum.POUCH,
 	[STATE.StateEnum.Level.TileSize] = 64,
 	[STATE.StateEnum.Level.MaxRoundTimeSeconds] = 180,
 	[STATE.StateEnum.Level.MouseOverTileHash] = nil,

@@ -54,14 +54,48 @@ local function render_belt_equipment()
 	select_tool(1)
 end
 
+-- Renders current inventory type behind the scenes so its ready when users needs to open it
+local function init_inventory(self)
+	local inventory_node = gui.get_node("inventory")
+	self.inventory_initial_position = gui.get_position(inventory_node)
+	gui.set_texture(inventory_node, "ui")
+	gui.play_flipbook(inventory_node, "pouch")
+	gui.set_scale(inventory_node, vmath.vector3(0.5, 0.5, 0))
+
+	local inventory_type = state.game_state[state.StateEnum.Inventory.Type]
+	local inventory_cell_size = vmath.vector3(175, 175, 0)
+	if inventory_type == state.InventoryTypeEnum.POUCH then
+		-- pouch only has 2 cells
+		for i = 1, 2 do
+			local cell_node = gui.new_box_node(vmath.vector3(0, i * (-60 * (i - 1)), 0), inventory_cell_size)
+			gui.set_texture(cell_node, "ui")
+			gui.play_flipbook(cell_node, "inventory_cell")
+			gui.set_id(cell_node, "cell_"..i)
+			gui.set_parent(cell_node, inventory_node)
+		end
+	end
+end
+
+local function toggle_inventory(self)
+	local inventory_node = gui.get_node("inventory")
+	if self.inventory_open then
+		gui.animate(inventory_node, "position.x", self.inventory_initial_position, gui.EASING_INOUTQUAD, 1)
+	else
+		gui.animate(inventory_node, "position.x", self.inventory_initial_position.x - 400, gui.EASING_INOUTQUAD, 1)
+	end
+	self.inventory_open = not self.inventory_open
+end
+
 function init(self)
 	-- Save energy bar node so we can scale it based on players energy
 	self.player_energy_node = gui.get_node("player_energy")
 	-- Remember initial width of the node so we can reset it back to it when energy resets
 	self.energy_bar_intial_scale = gui.get_scale(self.player_energy_node).x
+	self.inventory_open = false
+	self.inventory_initial_position = nil
 
 	render_belt_equipment()
-	-- select_first_tool()
+	init_inventory(self)
 end
 
 function update(self)
@@ -97,5 +131,7 @@ function on_message(self, message_id, message, sender)
 		update_round_timer(self, message.timeleft)
 	elseif message_id == hash("select_belt_tool") then
 		select_tool(message.item_number)
+	elseif message_id == hash("toggle_inventory") then
+		toggle_inventory(self)
 	end
 end
