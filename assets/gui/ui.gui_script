@@ -1,10 +1,67 @@
 local state = require "main.state.game"
+
+local function select_tool(index)
+	local active_tool_id = state.game_state[state.StateEnum.Player.SelectedTool]
+	local active_tool_node = nil
+	local active_tool_pos = nil
+	if active_tool_id then 
+		active_tool_node = gui.get_node(active_tool_id)
+		active_tool_pos = gui.get_position(active_tool_node)
+	end
+	local new_tool_id = state.game_state[state.StateEnum.Player.BeltItems][index]
+	local new_tool_node = gui.get_node(new_tool_id)
+	local new_tool_pos = gui.get_position(new_tool_node)
+
+	-- If a tool is already selected and its not the same as new
+	if active_tool_id ~= new_tool_id and active_tool_id then 
+		-- Lower current active tool back into belt
+		active_tool_pos.y = active_tool_pos.y - 50
+		gui.set_position(active_tool_node, active_tool_pos)
+		
+		-- Raise new tool from belt
+		state.game_state[state.StateEnum.Player.SelectedTool] = new_tool_id
+		new_tool_pos.y = new_tool_pos.y + 50
+		gui.set_position(new_tool_node, new_tool_pos)
+	elseif active_tool_id then -- If we are selecting same tool thats active, put it back into belt
+		active_tool_pos.y = active_tool_pos.y - 50
+		gui.set_position(active_tool_node, active_tool_pos)
+		state.game_state[state.StateEnum.Player.SelectedTool] = nil
+	else
+		-- No active tool selected, select it
+		state.game_state[state.StateEnum.Player.SelectedTool] = new_tool_id
+		new_tool_pos.y = new_tool_pos.y + 50
+		gui.set_position(new_tool_node, new_tool_pos)
+	end
+end
+
+local function render_belt_equipment()
+	local belt = gui.get_node("belt")
+	local all_tools = state.game_state[state.StateEnum.Player.BeltItems]
+	
+	-- Populate belt with tools
+	for index, item in ipairs(all_tools) do
+		local new_x_position = -20 + (20 * (index - 1))
+		local new_node = gui.new_box_node(vmath.vector3(new_x_position, 0, 0), vmath.vector3(120, 200, 0))  -- Position and size of the node
+
+		gui.set_texture(new_node, "ui")
+		gui.set_layer(new_node, "border")
+		gui.set_id(new_node, item)
+		gui.play_flipbook(new_node, item)
+		gui.set_parent(new_node, belt)
+	end
+
+	-- Always select the first available tool by default
+	select_tool(1)
+end
+
 function init(self)
 	-- Save energy bar node so we can scale it based on players energy
 	self.player_energy_node = gui.get_node("player_energy")
 	-- Remember initial width of the node so we can reset it back to it when energy resets
 	self.energy_bar_intial_scale = gui.get_scale(self.player_energy_node).x
-	-- Total possible energy user has. can be increased based on skills, perks, etc.
+
+	render_belt_equipment()
+	-- select_first_tool()
 end
 
 function update(self)
@@ -38,5 +95,7 @@ function on_message(self, message_id, message, sender)
 		gui.set_text(gui.get_node("debug_tile_count"), ("total: %d, visible: %d"):format(message.total, message.visible))
 	elseif message_id == hash("update_round_timer") then
 		update_round_timer(self, message.timeleft)
+	elseif message_id == hash("select_belt_tool") then
+		select_tool(message.item_number)
 	end
 end

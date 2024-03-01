@@ -177,6 +177,8 @@ function on_input(self, action_id, action)
 		end
 	elseif action_id == hash("interact") and action.pressed then
 		notifyEnergyController(self, -1)
+	elseif action_id == hash("first_belt_tool") and action.pressed then
+		msg.post("/gui#ui", "select_belt_tool", {item_number = 1})
 	elseif action_id == hash("escape") then
 		msg.post("@system:", "exit", {code = 0})
 	end
