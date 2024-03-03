@@ -101,7 +101,7 @@ end
 function update(self)
 	-- TODO: for now only logs count of TileTypeEnum.ORE
 	gui.set_text(gui.get_node("debug_inventory"),
-		("Resources: %d, weight: %d"):format(state.game_state[state.StateEnum.Inventory.Items.Resources][2] or 0, state.game_state[state.StateEnum.Inventory.Weight]))
+	("Resources: %d, weight: %d"):format((state.game_state[state.StateEnum.Inventory.Items.Resources][3] or 0) + (state.game_state[state.StateEnum.Inventory.Items.Resources][2] or 0), state.game_state[state.StateEnum.Inventory.Weight]))
 	gui.set_text(gui.get_node("debug_health"), "Health: " .. math.floor(state.game_state[state.StateEnum.Player.CurrentHealth]))
 end
 

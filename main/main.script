@@ -21,7 +21,12 @@ end
 
 local function create_tile(x, y, key) 
 	local p = vmath.vector3(x * TILE_SIZE, y * TILE_SIZE, 0)
-	local id = factory.create("/tile_factory#tile_factory", p, nil, { tile_type = state.game_state[state.StateEnum.Level.Tiles][key].tile_type, key = hash(key)})
+	local id = factory.create("/tile_factory#tile_factory", p, nil, 
+	 { 
+		tile_type = state.game_state[state.StateEnum.Level.Tiles][key].tile_type, 
+		key = hash(key), 
+		tile_sprite = state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite and hash(state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite) or nil
+	})
 	state.game_state[state.StateEnum.Level.Tiles][key].id = id
 	viewport[key] = {
 		id = id,
@@ -68,26 +73,31 @@ local function update_level(tx, ty)
 			local key = get_key(x, y)
 			if state.game_state[state.StateEnum.Level.Tiles][key] == nil then
 				local tile_type = TILE_TYPE.DIRT
+				local tile_sprite = nil
 				local hitpoints = 100
 				local n = perlin.noise((tx + x) / 10, (ty + y) / 10, 0.3)
 				if n < -0.3 then
 					tile_type = TILE_TYPE.GOLD_ORE
+					tile_sprite = state.TileSpriteAnimations.GOLD_ORE
 					hitpoints = 200
 				elseif n < -0.25 then	
 					tile_type = TILE_TYPE.IRON_ORE
 					hitpoints = 200
+					tile_sprite = state.TileSpriteAnimations.IRON_ORE
 				elseif n < -0.2 then
 					tile_type = TILE_TYPE.EMPTY
 					hitpoints = 0
 				elseif n < 0.05 then
 					tile_type = TILE_TYPE.DIRT
 					hitpoints = 100
+					tile_sprite = state.TileSpriteAnimations.DIRT
 				end
 
 				if tyle_type ~= TILE_TYPE.EMPTY then				
 					state.game_state[state.StateEnum.Level.Tiles][key] = {
 						tile_type = tile_type,
-						hitpoints = hitpoints
+						hitpoints = hitpoints,
+						tile_sprite = tile_sprite
 					}
 					total_tiles_count = total_tiles_count + 1
 				end
