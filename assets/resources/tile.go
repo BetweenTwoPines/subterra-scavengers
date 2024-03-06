@@ -67,7 +67,7 @@ embedded_components {
 embedded_components {
   id: "sprite"
   type: "sprite"
-  data: "default_animation: \"dirt-1\"\n"
+  data: "default_animation: \"dirt\"\n"
   "material: \"/builtins/materials/sprite.material\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
   "textures {\n"

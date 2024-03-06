@@ -20,6 +20,16 @@ local function canRemoveTile(self, targetTileX, targetTileY)
 	end	
 end
 
+function update_tile_sprite(x, y)
+	local tile = state.game_state[state.StateEnum.Level.Tiles][get_key(x , y)]
+	if tile == nil or tile.id == nil then
+		return
+	end
+	local new_sprite = state.get_sprite(x, y)
+	tile.tile_sprite = new_sprite
+	msg.post(tile.id, "update_tile_sprite", { sprite = new_sprite })
+end
+
 function on_input(self, action_id, action)
 	if action_id == hash("interact") and action.pressed then
 		local availableEnergy = state.game_state.get_state_property(state.StateEnum.Player.CurrentEnergy)
@@ -35,41 +45,29 @@ function on_input(self, action_id, action)
 			print("[Error]: hovered over tile has not been updated in time. This needs to be fixed. Issue https://trello.com/c/Gy7Dplcu/27-fix-have-to-clear-out-hovered-over-tile-in-the-main-state-when-it-has-been-mined-or-moved-out-from")
 			return
 		end			
-		
-		local key = get_key(pos.x / TILE_SIZE, pos.y / TILE_SIZE)
+		local x = pos.x / TILE_SIZE
+		local y = pos.y / TILE_SIZE
+		local key = get_key(x, y)
 		if hoveredOverNode then
-			local hitpoints = state.game_state[state.StateEnum.Level.Tiles][key].hitpoints - 50
-			state.game_state[state.StateEnum.Level.Tiles][key].hitpoints = hitpoints
+			local tile = state.game_state[state.StateEnum.Level.Tiles][key]
+			local hitpoints = tile.hitpoints - 50
+			tile.hitpoints = hitpoints
 			if hitpoints <= 0 then
-				msg.post("/main#main", "delete_tile", { key = key})
-				go.delete(state.game_state.get_state_property(state.StateEnum.Level.MouseOverTileHash))
 				--  empty tiles dont drop anything
 				if state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.IRON_ORE or state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.GOLD_ORE then
 					factory.create("/factory#ore_factory", pos, nil, { ore_type_id = state.game_state[state.StateEnum.Level.Tiles][key].tile_type })
 				end
+				state.game_state[state.StateEnum.Level.Tiles][key].tile_type = TILE_TYPE.EMPTY
+				msg.post("/main#main", "delete_tile", { key = key})
+				go.delete(state.game_state.get_state_property(state.StateEnum.Level.MouseOverTileHash))
+
+				update_tile_sprite(x + 1, y)
+				update_tile_sprite(x - 1, y)
+				update_tile_sprite(x, y + 1)
+				update_tile_sprite(x, y - 1)
+
 			else
-				local new_sprite
-				if state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite == state.TileSpriteAnimations.IRON_ORE then 
-					new_sprite = state.TileSpriteAnimations.IRON_ORE_BROKEN_2
-				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite == state.TileSpriteAnimations.IRON_ORE_BROKEN_2 then
-					new_sprite = state.TileSpriteAnimations.IRON_ORE_BROKEN_3
-				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite == state.TileSpriteAnimations.IRON_ORE_BROKEN_3 then 
-					new_sprite = state.TileSpriteAnimations.IRON_ORE_BROKEN_4
-				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite == state.TileSpriteAnimations.GOLD_ORE then
-					new_sprite = state.TileSpriteAnimations.GOLD_ORE_BROKEN_2
-				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite == state.TileSpriteAnimations.GOLD_ORE_BROKEN_2 then
-					new_sprite = state.TileSpriteAnimations.GOLD_ORE_BROKEN_3
-				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite == state.TileSpriteAnimations.GOLD_ORE_BROKEN_3 then
-					new_sprite = state.TileSpriteAnimations.GOLD_ORE_BROKEN_4
-				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite == state.TileSpriteAnimations.DIRT then
-					new_sprite = state.TileSpriteAnimations.DIRT_BROKEN_2
-				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite == state.TileSpriteAnimations.DIRT_BROKEN_2 then
-					new_sprite = state.TileSpriteAnimations.DIRT_BROKEN_3
-				elseif state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite == state.TileSpriteAnimations.DIRT_BROKEN_3 then
-					new_sprite = state.TileSpriteAnimations.DIRT_BROKEN_4
-				end
-				state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite = new_sprite
-				msg.post(state.game_state[state.StateEnum.Level.Tiles][key].id, "update_tile_sprite", { sprite = new_sprite })
+				update_tile_sprite(x, y)
 			end
 		end
 	end
