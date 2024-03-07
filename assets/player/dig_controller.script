@@ -22,7 +22,7 @@ end
 
 function update_tile_sprite(x, y)
 	local tile = state.game_state[state.StateEnum.Level.Tiles][get_key(x , y)]
-	if tile == nil or tile.id == nil then
+	if tile == nil or tile.id == nil or tile.tile_type == TILE_TYPE.EMPTY then
 		return
 	end
 	local new_sprite = state.get_sprite(x, y)
