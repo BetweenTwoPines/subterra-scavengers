@@ -30,5 +30,8 @@ function on_message(self, message_id, message, sender)
 		if message.sprite then
 			sprite.play_flipbook("#sprite", message.sprite)
 		end
+	elseif message_id == hash("hit") then
+		particlefx.play("#tile_hit")
 	end
+
 end

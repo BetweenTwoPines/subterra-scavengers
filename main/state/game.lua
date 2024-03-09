@@ -396,8 +396,6 @@ STATE.TileSpriteAnimations = {
 STATE.ResourceWeightMap = {
 	[STATE.TileTypeEnum.IRON_ORE] = 5,
 	[STATE.TileTypeEnum.GOLD_ORE] = 10
-	[STATE.TileTypeEnum.IRON_ORE] = 5,
-	[STATE.TileTypeEnum.GOLD_ORE] = 10
 }
 
 STATE.game_state = {
