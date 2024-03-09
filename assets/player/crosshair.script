@@ -53,7 +53,7 @@ function on_message(self, message_id, message, sender)
 			new_position.x = player_pos.x + TILE_SIZE * norm_dx
 			new_position.y = player_pos.y + TILE_SIZE * norm_dy
 		end
-
+		msg.post("gui#ui", "debug_coordinates", {x = new_position.x / TILE_SIZE, y = new_position.y / TILE_SIZE})
 		go.set_position(new_position)
 	end
 end

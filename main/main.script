@@ -21,7 +21,13 @@ end
 
 local function create_tile(x, y, key) 
 	local p = vmath.vector3(x * TILE_SIZE, y * TILE_SIZE, 0)
-	local id = factory.create("/tile_factory#tile_factory", p, nil, { tile_type = state.game_state[state.StateEnum.Level.Tiles][key].tile_type})
+	local id = factory.create("/tile_factory#tile_factory", p, nil, 
+	 { 
+		tile_type = state.game_state[state.StateEnum.Level.Tiles][key].tile_type, 
+		key = hash(key), 
+		tile_sprite = state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite and hash(state.game_state[state.StateEnum.Level.Tiles][key].tile_sprite) or nil
+	})
+	state.game_state[state.StateEnum.Level.Tiles][key].id = id
 	viewport[key] = {
 		id = id,
 		x = x,
@@ -52,6 +58,15 @@ local function render_viewport(min_x, max_x, min_y, max_y)
 			end
 		end
 	end
+	for x = min_x, max_x, 1 do
+		for y = min_y, max_y, 1 do
+			local key = get_key(x, y)
+			if state.game_state[state.StateEnum.Level.Tiles][key].tile_type ~= nil and state.game_state[state.StateEnum.Level.Tiles][key].hitpoints > 0 then
+				local sprite = state.get_sprite(x, y)
+				msg.post(state.game_state[state.StateEnum.Level.Tiles][key].id, "update_tile_sprite",  { sprite = sprite })
+			end
+		end
+	end
 end
 
 local function update_level(tx, ty)
@@ -67,23 +82,33 @@ local function update_level(tx, ty)
 			local key = get_key(x, y)
 			if state.game_state[state.StateEnum.Level.Tiles][key] == nil then
 				local tile_type = TILE_TYPE.DIRT
-				local hitpoints = 100
+				local tile_sprite = nil
+				local hitpoints = 200
 				local n = perlin.noise((tx + x) / 10, (ty + y) / 10, 0.3)
-				if n < -0.29 then
-					tile_type = TILE_TYPE.ORE
+				if n < -0.3 then
+					tile_type = TILE_TYPE.GOLD_ORE
+					tile_sprite = state.TileSpriteAnimations.GOLD_ORE
 					hitpoints = 200
+				elseif n < -0.25 then	
+					tile_type = TILE_TYPE.IRON_ORE
+					hitpoints = 200
+					tile_sprite = state.TileSpriteAnimations.IRON_ORE
 				elseif n < -0.2 then
 					tile_type = TILE_TYPE.EMPTY
 					hitpoints = 0
 				elseif n < 0.05 then
 					tile_type = TILE_TYPE.DIRT
-					hitpoints = 100
+					hitpoints = 200
+					tile_sprite = state.TileSpriteAnimations.DIRT
 				end
 
 				if tyle_type ~= TILE_TYPE.EMPTY then				
 					state.game_state[state.StateEnum.Level.Tiles][key] = {
 						tile_type = tile_type,
-						hitpoints = hitpoints
+						hitpoints = hitpoints,
+						tile_sprite = tile_sprite,
+						x = x,
+						y = y
 					}
 					total_tiles_count = total_tiles_count + 1
 				end
@@ -128,38 +153,8 @@ function update(self, dt)
 	self.previous_py = py
 end
 
-function fixed_update(self, dt)
-	-- This function is called if 'Fixed Update Frequency' is enabled in the Engine section of game.project
-	-- Can be coupled with fixed updates of the physics simulation if 'Use Fixed Timestep' is enabled in
-	-- Physics section of game.project
-	-- Add update code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
-end
-
 function on_message(self, message_id, message, sender)
 	if message_id == hash("delete_tile") then
 		viewport[message.key] = nil
 	end
-	-- Add message-handling code here
-	-- Learn more: https://defold.com/manuals/message-passing/
-	-- Remove this function if not needed
-end
-
-function on_input(self, action_id, action)
-	-- Add input-handling code here. The game object this script is attached to
-	-- must have acquired input focus:
-	--
-	--    msg.post(".", "acquire_input_focus")
-	--
-	-- All mapped input bindings will be received. Mouse and touch input will
-	-- be received regardless of where on the screen it happened.
-	-- Learn more: https://defold.com/manuals/input/
-	-- Remove this function if not needed
-end
-
-function on_reload(self)
-	-- Add reload-handling code here
-	-- Learn more: https://defold.com/manuals/hot-reload/
-	-- Remove this function if not needed
 end
