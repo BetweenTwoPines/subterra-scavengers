@@ -36,3 +36,7 @@ debug = 0
 [sprite]
 max_count = 512
 
+[particle_fx]
+max_count = 1024
+max_emitter_count = 1024
+
