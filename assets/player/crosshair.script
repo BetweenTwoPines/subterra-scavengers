@@ -55,6 +55,8 @@ function on_message(self, message_id, message, sender)
 		end
 		msg.post("gui#ui", "debug_coordinates", {x = new_position.x / TILE_SIZE, y = new_position.y / TILE_SIZE})
 		go.set_position(new_position)
+	elseif message_id == hash("hit") then
+		particlefx.play("#tile_hit")
 	end
 end
 

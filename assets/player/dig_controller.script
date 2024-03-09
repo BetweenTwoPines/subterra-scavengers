@@ -50,7 +50,7 @@ function on_input(self, action_id, action)
 		local key = get_key(x, y)
 		if hoveredOverNode then
 			local tile = state.game_state[state.StateEnum.Level.Tiles][key]
-			msg.post(tile.id, "hit")
+			msg.post("/crosshair", "hit")
 			local hitpoints = tile.hitpoints - 50
 			tile.hitpoints = hitpoints
 			if hitpoints <= 0 then
