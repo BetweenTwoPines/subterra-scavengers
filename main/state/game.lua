@@ -15,10 +15,10 @@ STATE.StateEnum = {
 		Row = "inventory_size_row",
 		Col = "inventory_size_col",
 		MaxWeight = "inventory_max_weight",
+		MaxItems = "inventory_max_items",
 		Weight = "inventory_weight",
 		Items = {
 			Resources = "inventory_items_resources"
-			-- TODO Items
 		},
 		Type = "type"
 	},
@@ -43,6 +43,13 @@ STATE.TileTypeEnum = {
 	DIRT = 1,
 	IRON_ORE = 2,
 	GOLD_ORE = 3,
+}
+
+STATE.ReverseTileTypeEnum = {
+	[0] = "EMPTY",
+	[1] = "DIRT",
+	[2] = "IRON_ORE",
+	[3] = "GOLD_ORE",
 }
 
 STATE.TileSpriteAnimations = {
@@ -394,8 +401,8 @@ STATE.TileSpriteAnimations = {
 }
 
 STATE.ResourceWeightMap = {
-	[STATE.TileTypeEnum.IRON_ORE] = 5,
-	[STATE.TileTypeEnum.GOLD_ORE] = 10
+	[STATE.ReverseTileTypeEnum[STATE.TileTypeEnum.IRON_ORE]] = 5,
+	[STATE.ReverseTileTypeEnum[STATE.TileTypeEnum.GOLD_ORE]] = 10
 }
 
 STATE.game_state = {
@@ -413,6 +420,7 @@ STATE.game_state = {
 	[STATE.StateEnum.Inventory.Items.Resources] = {},
 	[STATE.StateEnum.Inventory.Weight] = 0,
 	[STATE.StateEnum.Inventory.MaxWeight] = 50,
+	[STATE.StateEnum.Inventory.MaxItems] = 2,
 	[STATE.StateEnum.Inventory.Type] = STATE.InventoryTypeEnum.POUCH,
 	[STATE.StateEnum.Level.TileSize] = 64,
 	[STATE.StateEnum.Level.MaxRoundTimeSeconds] = 180,
