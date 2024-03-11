@@ -78,5 +78,6 @@ function on_message(self, message_id, message, sender)
 	if message_id == hash('move_background') then
 		apply_parallax_effect("treeline", 0.1, message.direction)
 		apply_parallax_effect("skyline", 0.2, message.direction)
+		apply_parallax_effect("underground", 0.2, message.direction)
 	end
 end
