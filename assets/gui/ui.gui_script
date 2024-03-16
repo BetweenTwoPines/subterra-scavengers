@@ -79,15 +79,11 @@ local function init_inventory(self)
 			gui.set_id(resource_count_text_node, "cell_"..i.."_text")
 			gui.set_scale(resource_count_text_node, vmath.vector3(1.7, 1.7, 0))
 
-			-- TODO: This should be an image asset of resource type
-			local resource_type = gui.new_text_node(vmath.vector3(0, 0, 0),"")
-			gui.set_font(resource_type, "system_font")
-			gui.set_color(resource_type, vmath.vector3(0, 0, 0))
-			gui.set_id(resource_type, "cell_"..i.."_type")
-			gui.set_scale(resource_type, vmath.vector3(1, 1, 0))
+			local resource_image = gui.new_box_node(vmath.vector3(0, 0, 0), vmath.vector3(50, 50, 0))
+			gui.set_id(resource_image, "cell_"..i.."_type")
 			
 			gui.set_parent(resource_count_text_node, cell_node)
-			gui.set_parent(resource_type, cell_node)
+			gui.set_parent(resource_image, cell_node)
 			gui.set_parent(cell_node, inventory_node)
 		end
 	end
@@ -109,19 +105,18 @@ local function update_inventory_items()
 	-- TODO: this needs to be optimized. There is no need to update every inventory cell when one type of resource is picked up
 	for key, resource in pairs(all_resources) do
 		local resource_count = hash("cell_" .. i .. "_text")
-		local resource_type = hash("cell_" .. i .. "_type")
+		local resource_image = hash("cell_" .. i .. "_type")
 		local resource_count_text_node = gui.get_node(resource_count)
-		local resource_type_text_node = gui.get_node(resource_type)
+		local resource_image_node = gui.get_node(resource_image)
 
 		if resource.count then
 			-- Update the text node with the current count
 			gui.set_text(resource_count_text_node, tostring(resource.count))
-			-- TODO: This should be an image asset of resource type instead of a string
-			gui.set_text(resource_type_text_node, tostring(key))
-		else-- TODO: This should be an image asset of resource type
-			-- If there's no such resource, set the count to '0' or 'Empty'
+			gui.set_texture(resource_image_node, "resources")
+			-- TODO: parametirize this to accept a parameter of resource type
+			gui.play_flipbook(resource_image_node, "ore")
+		else
 			gui.set_text(resource_count_text_node, "")
-			gui.set_text(resource_type_text_node, "")
 		end
 		i = i + 1
 	end

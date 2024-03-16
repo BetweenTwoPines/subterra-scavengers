@@ -7,6 +7,10 @@ textures {
   name: "ui"
   texture: "/assets/gui/ui.atlas"
 }
+textures {
+  name: "resources"
+  texture: "/assets/resources/resources.atlas"
+}
 background_color {
   x: 0.0
   y: 0.0
