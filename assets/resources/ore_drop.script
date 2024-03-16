@@ -53,21 +53,25 @@ local function handle_obstacle_contact(self, normal, distance)
 	end
 end
 
-local function pickup(ore_type_id)
+local function pickup(ore_type)
 	local inventory_resources = state.game_state[state.StateEnum.Inventory.Items.Resources]
 
 	-- Check if the ore_type_id already exists in the inventory
-	if inventory_resources[ore_type_id] then
+	if inventory_resources[ore_type] then
 		-- Ore type exists, increment its quantity
-		inventory_resources[ore_type_id] = inventory_resources[ore_type_id] + 1
+		-- inventory_resources[ore_type] = inventory_resources[ore_type] + 1
+		inventory_resources[ore_type].count = inventory_resources[ore_type].count + 1
+		inventory_resources[ore_type].weight = inventory_resources[ore_type].weight + state.ResourceWeightMap[ore_type]
 	else
 		-- Ore type does not exist, init with 1
-		inventory_resources[ore_type_id] = 1
+		inventory_resources[ore_type] = {count = 1, weight = state.ResourceWeightMap[ore_type], sprite_url = ore_types[1]}
 	end
 	-- update total weight of inventory
-	state.game_state[state.StateEnum.Inventory.Weight] = state.game_state[state.StateEnum.Inventory.Weight] + state.ResourceWeightMap[ore_type_id]
+	state.game_state[state.StateEnum.Inventory.Weight] = state.game_state[state.StateEnum.Inventory.Weight] + state.ResourceWeightMap[ore_type]
 	-- update number of resources
 	state.game_state[state.StateEnum.Inventory.Items.Resources] = inventory_resources
+	msg.post("/gui#ui", "update_inventory")
+	go.delete()
 end
 
 function on_message(self, message_id, message, sender)
@@ -90,8 +94,8 @@ function on_message(self, message_id, message, sender)
 				self.first_render = false
 			end
 		elseif message.group == hash("player") then
-			pickup(self.ore_type_id)
-			go.delete()
+			local ore_type = state.ReverseTileTypeEnum[self.ore_type_id]
+			pickup(ore_type)
 		end
 	end
 end

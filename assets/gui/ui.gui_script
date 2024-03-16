@@ -71,6 +71,19 @@ local function init_inventory(self)
 			gui.set_texture(cell_node, "ui")
 			gui.play_flipbook(cell_node, "inventory_cell")
 			gui.set_id(cell_node, "cell_"..i)
+
+			-- text node for displayling count of a resource
+			local resource_count_text_node = gui.new_text_node(vmath.vector3(-20, -20, 0),"")
+			gui.set_font(resource_count_text_node, "system_font")
+			gui.set_color(resource_count_text_node, vmath.vector3(0, 0, 0))
+			gui.set_id(resource_count_text_node, "cell_"..i.."_text")
+			gui.set_scale(resource_count_text_node, vmath.vector3(1.7, 1.7, 0))
+
+			local resource_image = gui.new_box_node(vmath.vector3(0, 0, 0), vmath.vector3(50, 50, 0))
+			gui.set_id(resource_image, "cell_"..i.."_type")
+			
+			gui.set_parent(resource_count_text_node, cell_node)
+			gui.set_parent(resource_image, cell_node)
 			gui.set_parent(cell_node, inventory_node)
 		end
 	end
@@ -86,6 +99,29 @@ local function toggle_inventory(self)
 	self.inventory_open = not self.inventory_open
 end
 
+local function update_inventory_items()
+	local all_resources = state.game_state[state.StateEnum.Inventory.Items.Resources]
+	local i = 1
+	-- TODO: this needs to be optimized. There is no need to update every inventory cell when one type of resource is picked up
+	for key, resource in pairs(all_resources) do
+		local resource_count = hash("cell_" .. i .. "_text")
+		local resource_image = hash("cell_" .. i .. "_type")
+		local resource_count_text_node = gui.get_node(resource_count)
+		local resource_image_node = gui.get_node(resource_image)
+
+		if resource.count then
+			-- Update the text node with the current count
+			gui.set_text(resource_count_text_node, tostring(resource.count))
+			gui.set_texture(resource_image_node, "resources")
+			-- TODO: parametirize this to accept a parameter of resource type
+			gui.play_flipbook(resource_image_node, "ore")
+		else
+			gui.set_text(resource_count_text_node, "")
+		end
+		i = i + 1
+	end
+end
+
 function init(self)
 	-- Save energy bar node so we can scale it based on players energy
 	self.player_energy_node = gui.get_node("player_energy")
@@ -96,13 +132,13 @@ function init(self)
 
 	render_belt_equipment()
 	init_inventory(self)
+
+	-- TODO: Remove these once debug texts are removed
+	msg.post("/gui#ui", "debug_health")
 end
 
 function update(self)
-	-- TODO: for now only logs count of TileTypeEnum.ORE
-	gui.set_text(gui.get_node("debug_inventory"),
-	("Resources: %d, weight: %d"):format((state.game_state[state.StateEnum.Inventory.Items.Resources][3] or 0) + (state.game_state[state.StateEnum.Inventory.Items.Resources][2] or 0), state.game_state[state.StateEnum.Inventory.Weight]))
-	gui.set_text(gui.get_node("debug_health"), "Health: " .. math.floor(state.game_state[state.StateEnum.Player.CurrentHealth]))
+	
 end
 
 local function update_energy_bar(self, energyBarScaleRatio)
@@ -129,11 +165,15 @@ function on_message(self, message_id, message, sender)
 		gui.set_text(gui.get_node("debug_tile_count"), ("total: %d, visible: %d"):format(message.total, message.visible))
 	elseif message_id == hash("debug_coordinates") then
 		gui.set_text(gui.get_node("debug_coordinates"), ("x: %d, y: %d"):format(message.x, message.y))
+	elseif message_id == hash("debug_health") then
+		gui.set_text(gui.get_node("debug_health"), "Health: " .. math.floor(state.game_state[state.StateEnum.Player.CurrentHealth]) or 0)
 	elseif message_id == hash("update_round_timer") then
 		update_round_timer(self, message.timeleft)
 	elseif message_id == hash("select_belt_tool") then
 		select_tool(message.item_number)
 	elseif message_id == hash("toggle_inventory") then
 		toggle_inventory(self)
+	elseif message_id == hash("update_inventory") then
+		update_inventory_items()
 	end
 end
