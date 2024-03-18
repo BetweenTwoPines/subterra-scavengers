@@ -155,7 +155,7 @@ local function walk(self, direction)
 	end
 	if self.wall_contact ~= true then
 		-- apply parralax effect to background
-		msg.post("/background/scroller#background", "move_background", { direction = self.facing_direction * -1 })
+		msg.post("/background/scroller#scroller", "move_background", { direction = self.facing_direction * -1 })
 	end
 	-- update velocity and use different velocity on ground
 	self.velocity.x = max_speed * direction
