@@ -22,6 +22,22 @@ images {
   image: "/assets/gui/inventory_cell.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
+images {
+  image: "/assets/gui/menu/play_menu_btn_passive_300.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/gui/menu/play_menu_btn_active_300.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/gui/menu/options_menu_btn_active_300.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/gui/menu/options_menu_btn_passive_300.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
 margin: 0
 extrude_borders: 2
 inner_padding: 0
