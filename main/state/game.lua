@@ -31,6 +31,9 @@ STATE.StateEnum = {
 	},
 	Physics = {
 		Gravity = "physics_gravity"
+	},
+	Settings = {
+		FullScreen = "full_screen"
 	}
 }
 
@@ -425,7 +428,8 @@ STATE.game_state = {
 	[STATE.StateEnum.Level.TileSize] = 64,
 	[STATE.StateEnum.Level.MaxRoundTimeSeconds] = 180,
 	[STATE.StateEnum.Level.MouseOverTileHash] = nil,
-	[STATE.StateEnum.Level.Tiles] = {}
+	[STATE.StateEnum.Level.Tiles] = {},
+	[STATE.StateEnum.Settings.FullScreen] = false
 }
 
 

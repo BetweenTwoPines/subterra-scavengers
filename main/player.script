@@ -69,7 +69,7 @@ local function apply_damage(self, fall_distance)
 	local newHealth = state.game_state[state.StateEnum.Player.CurrentHealth] - fall_damage
 	if newHealth <= 0 then
 		-- You are dead
-		msg.post("proxy:/controller#controller", "show_menu")
+		msg.post("proxy:/controller#controller", "load_menu")
 	else
 		state.game_state[state.StateEnum.Player.CurrentHealth] = newHealth
 		msg.post("/gui#ui", "debug_health")

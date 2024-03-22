@@ -1,5 +1,6 @@
 [project]
 title = Subterra Scavengers
+developer = Code Pine
 dependencies#0 = https://github.com/rgrams/rendercam/archive/1.0.3.zip
 dependencies#1 = https://github.com/subsoap/defos/archive/refs/tags/v2.7.1.zip
 
