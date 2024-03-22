@@ -17,7 +17,7 @@ function init(self)
 	self.current_proxy = nil
 	self.timer = max_round_time
 	self.round_loaded = false
-	msg.post("#", "show_menu")
+	msg.post("#", "load_menu")
 end
 
 function update(self, dt)
@@ -31,14 +31,13 @@ function update(self, dt)
 		if self.timer <= 0 then
 			self.round_loaded = false
 			show(self, "#hubproxy")
-			defos.set_cursor_visible(true)
 			self.timer = max_round_time
 		end
 	end
 end
 
 function on_message(self, message_id, message, sender)
-	if message_id == hash("show_menu") then
+	if message_id == hash("load_menu") then
 		show(self, "#menuproxy")
 	elseif message_id == hash("load_level") then
 		state.reset_player_stats()
@@ -47,6 +46,8 @@ function on_message(self, message_id, message, sender)
 		self.round_loaded = true
 	elseif message_id == hash("load_hub") then
 		show(self, "#hubproxy")
+	elseif message_id == hash("load_options") then
+		show(self, "#optionsproxy")
 	elseif message_id == hash("proxy_loaded") then
 		self.current_proxy = sender
 		msg.post(sender, "enable")

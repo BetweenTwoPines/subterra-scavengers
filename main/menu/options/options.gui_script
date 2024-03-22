@@ -1,0 +1,23 @@
+local state = require "main.state.game"
+
+local function init_options_from_state(self)
+	gui.set_enabled(self.full_screen_checkbox, state.game_state[state.StateEnum.Settings.FullScreen])
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.full_screen_checkbox = gui.get_node("full_screen/check")
+	init_options_from_state(self)
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("interact") and action.released then
+		if gui.pick_node(gui.get_node("back_btn_txt"), action.x, action.y) then
+			msg.post("proxy:/controller#controller", "load_menu")
+		elseif gui.pick_node(self.full_screen_checkbox, action.x, action.y) then
+			state.game_state[state.StateEnum.Settings.FullScreen] = not gui.is_enabled(self.full_screen_checkbox, false)
+			gui.set_enabled(self.full_screen_checkbox, state.game_state[state.StateEnum.Settings.FullScreen])
+			defos.toggle_fullscreen()
+		end
+	end
+end

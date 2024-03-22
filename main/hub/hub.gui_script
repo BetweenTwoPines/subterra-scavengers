@@ -72,7 +72,7 @@ function on_input(self, action_id, action)
 		if gui.pick_node(gui.get_node("play_btn"), action.x, action.y) then
 			msg.post("proxy:/controller#controller", "load_level")
 		elseif gui.pick_node(gui.get_node("main_menu_btn"), action.x, action.y) then
-			msg.post("proxy:/controller#controller", "show_menu")
+			msg.post("proxy:/controller#controller", "load_menu")
 		end
 	end
 end
