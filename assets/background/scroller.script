@@ -1,0 +1,70 @@
+local TREE_IMAGES = {"left_tree", "middle_tree", "right_tree"}
+local treeline_parallax_speed = 20
+local SKY_IMAGES = {"left_sky", "middle_sky", "right_sky"}
+local skyline_parallax_speed = 5
+local GROUND_IMAGES = {"left_ground", "middle_ground", "right_ground"}
+local ground_parallax_speed = 5
+
+-- Render images so that the player is always in the middle, makes calculations easier
+local function render_on_player(self)
+	go.set_position(vmath.vector3(self.player_pos.x - self.tree_img_size.x, self.player_pos.y + 75, -0.1), "left_tree")
+	go.set_position(vmath.vector3(self.player_pos.x, self.player_pos.y + 75, -0.1), "middle_tree")
+	go.set_position(vmath.vector3(self.player_pos.x + self.tree_img_size.x, self.player_pos.y + 75, -0.1), "right_tree")
+
+	go.set_position(vmath.vector3(self.player_pos.x - self.sky_img_size.x, self.player_pos.y + 100, -0.2), "left_sky")
+	go.set_position(vmath.vector3(self.player_pos.x, self.player_pos.y + 100, -0.2), "middle_sky")
+	go.set_position(vmath.vector3(self.player_pos.x + self.sky_img_size.x, self.player_pos.y + 100, -0.2), "right_sky")
+
+	go.set_position(vmath.vector3(self.player_pos.x - self.ground_img_size.x, self.player_pos.y, -0.15), "left_ground")
+	go.set_position(vmath.vector3(self.player_pos.x, self.player_pos.y - 65, -0.15), "middle_ground")
+	go.set_position(vmath.vector3(self.player_pos.x + self.ground_img_size.x, self.player_pos.y, -0.15), "right_ground")
+end
+
+function init(self)
+	self.tree_img_size = go.get("middle_tree#sprite", "size")
+	self.sky_img_size = go.get("middle_sky#sprite", "size")
+	self.ground_img_size = go.get("middle_ground#sprite", "size")
+	self.player_moving = false
+	self.dir = 1
+	self.player_pos = go.get_position("/player/player#player")
+	
+	render_on_player(self)
+end
+
+local function apply_parallax(self, IMAGE_MAP, img_size, dt, speed)
+	for i, img in ipairs(IMAGE_MAP) do
+		local img_pos = go.get_position(img)
+		local img_to_player_distance = vmath.length(self.player_pos - img_pos)
+		
+		-- Rotate images if player middle is the distance to middle of background img + 100px for buffer
+		if self.dir == -1 and img_to_player_distance >= img_size.x + 100 and img_pos.x < self.player_pos.x then	-- Player move right
+			-- Move leftmost img all the way to the right
+			img_pos.x = img_pos.x + 3 * img_size.x
+		elseif self.dir == 1 and img_to_player_distance >= img_size.x + 100 and img_pos.x > self.player_pos.x then -- Player move left
+			-- Move rightmost img all the way to the left
+			img_pos.x = img_pos.x - 3 * img_size.x
+		end
+		
+		-- Apply parallax img movement
+		img_pos.x = img_pos.x + speed * self.dir * dt
+		go.set_position(img_pos, img)
+	end
+end
+
+function update(self, dt)
+	-- Only run this when the player is moving to prevent unecessary computations
+	if self.player_moving then
+		apply_parallax(self, TREE_IMAGES, self.tree_img_size, dt, treeline_parallax_speed)
+		apply_parallax(self, SKY_IMAGES, self.tree_img_size, dt, skyline_parallax_speed)
+		apply_parallax(self, GROUND_IMAGES, self.ground_img_size, dt, ground_parallax_speed)
+	end
+	self.player_moving = false
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash('move_background') then
+		self.player_moving = true
+		self.dir = message.direction
+		self.player_pos = go.get_position("/player/player#player")
+	end
+end
