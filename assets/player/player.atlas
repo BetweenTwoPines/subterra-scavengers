@@ -5,11 +5,15 @@ images {
 animations {
   id: "player_idle"
   images {
-    image: "/assets/player/miner_front.png"
+    image: "/assets/player/player_idle_pickaxe_1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_idle_pickaxe_2.png"
     sprite_trim_mode: SPRITE_TRIM_MODE_OFF
   }
   playback: PLAYBACK_LOOP_FORWARD
-  fps: 12
+  fps: 5
   flip_horizontal: 0
   flip_vertical: 0
 }
@@ -40,6 +44,84 @@ animations {
   }
   playback: PLAYBACK_LOOP_FORWARD
   fps: 12
+  flip_horizontal: 1
+  flip_vertical: 0
+}
+animations {
+  id: "player_pickaxe_hit_left"
+  images {
+    image: "/assets/player/player_pickaxe_hit_1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_4.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_5.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_6.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_7.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_8.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 60
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "player_pickaxe_hit_right"
+  images {
+    image: "/assets/player/player_pickaxe_hit_1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_4.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_5.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_6.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_7.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/player/player_pickaxe_hit_8.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 60
   flip_horizontal: 1
   flip_vertical: 0
 }
