@@ -1,13 +1,42 @@
 function init(self)
 	msg.post(".", "acquire_input_focus")
+	self.play_btn_hover = false
+	self.buttons = {
+		{trigger_id = "play_btn_trigger", id = "play_btn", active = "play_menu_btn_active_300", passive = "play_menu_btn_passive_300", hover = false},
+		{trigger_id = "options_btn_trigger", id = "options_btn", active = "options_menu_btn_active_300", passive = "options_menu_btn_passive_300", hover = false},
+	}
+end
+
+local function on_btn_hover(self, action)
+	for _, btn in ipairs(self.buttons) do
+		local trigger = gui.get_node(btn.trigger_id)
+		local sprite = gui.get_node(btn.id)
+		if gui.pick_node(trigger, action.x, action.y) then
+			-- Optimization, do not render sprite if its already been rendered
+			if btn.hover == false then
+				gui.play_flipbook(sprite, btn.active)
+				btn.hover = true
+			end
+		else
+			if btn.hover then
+				gui.play_flipbook(sprite, btn.passive)
+				btn.hover = false
+			end
+		end
+	end
 end
 
 function on_input(self, action_id, action)
+	if action_id == nil and action.x and action.y then
+		on_btn_hover(self, action)
+	end
+	
 	if action_id == hash("interact") and action.released then
 		if gui.pick_node(gui.get_node("play_btn"), action.x, action.y) then
 			msg.post("proxy:/controller#controller", "load_level")
-		elseif gui.pick_node(gui.get_node("hub_btn"), action.x, action.y) then
-			msg.post("proxy:/controller#controller", "load_hub")
+		elseif gui.pick_node(gui.get_node("options_btn"), action.x, action.y) then
+			-- msg.post("proxy:/controller#controller", "load_hub")
+			-- TODO load options screen
 		end
 	end
 end
