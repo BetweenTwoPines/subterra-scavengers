@@ -7,15 +7,24 @@ local ore_types = {
 
 -- Create and initialize custom game object property
 go.property("ore_type_id", 1)
+go.property("rerender", false)
 
 local gravity = state.game_state.get_state_property(state.StateEnum.Physics.Gravity)
 local initial_ore_drop_velocity = 100
 
 function init(self)
-	self.velocity = vmath.vector3(1, 500, 0)
+	if not self.rerender then
+		self.velocity = vmath.vector3(1, 500, 0)
+		self.random_x_axis_acceleration = math.random(-1, 1) * initial_ore_drop_velocity
+	else
+		self.velocity = vmath.vector3(0, 0, 0)
+		self.random_x_axis_acceleration = 0
+	end
+	-- self.velocity = vmath.vector3(1, 500, 0)
 	self.first_render = true
-	self.random_x_axis_acceleration = math.random(-1, 1) * initial_ore_drop_velocity
+	-- self.random_x_axis_acceleration = math.random(-1, 1) * initial_ore_drop_velocity
 	self.correction = vmath.vector3()
+	self.created = false
 end
 
 function update(self, dt)
@@ -35,6 +44,7 @@ function update(self, dt)
 	-- reset
 	self.grounded = false
 	self.correction = vmath.vector3()
+	self.rerender = false
 end
 
 local function handle_obstacle_contact(self, normal, distance)
@@ -71,6 +81,7 @@ local function pickup(ore_type)
 	-- update number of resources
 	state.game_state[state.StateEnum.Inventory.Items.Resources] = inventory_resources
 	msg.post("/gui#ui", "update_inventory")
+	msg.post("/main#main", "delete_ore", { id = go.get_id()})
 	go.delete()
 end
 
@@ -89,6 +100,10 @@ function on_message(self, message_id, message, sender)
 				if message.normal.y > 0.7 then
 					self.velocity.y = 0
 					self.velocity.x = 0
+					if not self.created then
+						msg.post("/main#main", "create_ore", { key = go.get_id()})
+						self.created = true
+					end
 				end
 			else
 				self.first_render = false
