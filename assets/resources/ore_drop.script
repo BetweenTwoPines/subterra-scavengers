@@ -13,6 +13,12 @@ local gravity = state.game_state.get_state_property(state.StateEnum.Physics.Grav
 local initial_ore_drop_velocity = 100
 
 function init(self)
+	if self.ore_type_id == state.TileTypeEnum.IRON_ORE then
+		self.ore_anim = "silver-ore"
+	else 
+		self.ore_anim = "gold-ore"
+	end
+	sprite.play_flipbook("#sprite", self.ore_anim)
 	if not self.rerender then
 		self.velocity = vmath.vector3(1, 500, 0)
 		self.random_x_axis_acceleration = math.random(-1, 1) * initial_ore_drop_velocity

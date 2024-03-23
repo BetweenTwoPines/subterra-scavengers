@@ -1,4 +1,4 @@
-default_animation: "ore"
+default_animation: "gold-ore"
 material: "/builtins/materials/sprite.material"
 blend_mode: BLEND_MODE_ALPHA
 textures {
