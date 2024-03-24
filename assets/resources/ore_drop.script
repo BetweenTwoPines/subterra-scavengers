@@ -7,6 +7,8 @@ local ore_types = {
 
 -- Create and initialize custom game object property
 go.property("ore_type_id", 1)
+-- This property tells the rendering logic to skip the initial bounce and render at exact coords
+-- Used during returning the ore back into viewport
 go.property("rerender", false)
 
 local gravity = state.game_state.get_state_property(state.StateEnum.Physics.Gravity)
@@ -28,7 +30,6 @@ function init(self)
 end
 
 function update(self, dt)
-	-- Apply gravity to the velocity if the object is not grounded
 	self.velocity.y = self.velocity.y + gravity * dt
 
 	-- Randomize the x direction of travel
@@ -42,7 +43,6 @@ function update(self, dt)
 	go.set_position(position)
 	
 	-- reset
-	self.grounded = false
 	self.correction = vmath.vector3()
 	self.rerender = false
 end
@@ -101,6 +101,7 @@ function on_message(self, message_id, message, sender)
 					self.velocity.y = 0
 					self.velocity.x = 0
 					if not self.created then
+						-- Notify main to store this ore GO in a table onlt ONCE on FIRST render. Main will use this to cleanup ore outside of viewport 
 						msg.post("/main#main", "create_ore", { key = go.get_id()})
 						self.created = true
 					end
