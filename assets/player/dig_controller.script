@@ -39,7 +39,10 @@ function on_input(self, action_id, action)
 			if hitpoints <= 0 then
 				--  empty tiles dont drop anything
 				if state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.IRON_ORE or state.game_state[state.StateEnum.Level.Tiles][key].tile_type == TILE_TYPE.GOLD_ORE then
+					sound.play(msg.url("/player/player#tile-destroy-ore"))
 					factory.create("/factory#ore_factory", pos, nil, { ore_type_id = state.game_state[state.StateEnum.Level.Tiles][key].tile_type })
+				else
+					sound.play(msg.url("/player/player#tile-destroy"))
 				end
 				state.game_state[state.StateEnum.Level.Tiles][key].tile_type = TILE_TYPE.EMPTY
 				msg.post("/main#main", "delete_tile", { key = key})

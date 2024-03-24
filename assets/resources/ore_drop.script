@@ -70,6 +70,7 @@ local function handle_obstacle_contact(self, normal, distance)
 end
 
 local function pickup(ore_type)
+	sound.play(msg.url("/player/player#ore-pickup"))
 	local inventory_resources = state.game_state[state.StateEnum.Inventory.Items.Resources]
 
 	-- Check if the ore_type_id already exists in the inventory
