@@ -415,7 +415,7 @@ STATE.game_state = {
 	[STATE.StateEnum.Player.MaxSpeed] = 150,
 	[STATE.StateEnum.Player.MaxHealth] = 100,
 	[STATE.StateEnum.Player.CurrentHealth] = 100,
-	[STATE.StateEnum.Player.Coins] = 50,
+	[STATE.StateEnum.Player.Coins] = 0,
 	[STATE.StateEnum.Player.BeltItems] = {"rusty_pickaxe"},
 	[STATE.StateEnum.Player.SelectedTool] = nil,
 	[STATE.StateEnum.Inventory.Row] = 2,
@@ -475,6 +475,7 @@ end
 function STATE.reset_player_stats()
 	STATE.game_state[STATE.StateEnum.Player.CurrentEnergy] = STATE.game_state[STATE.StateEnum.Player.MaxEnergy]
 	STATE.game_state[STATE.StateEnum.Player.CurrentHealth] = STATE.game_state[STATE.StateEnum.Player.MaxHealth]
+	STATE.game_state[STATE.StateEnum.Inventory.Items.Resources] = {}
 end
 
 function STATE.game_state.get_state_property(property)
