@@ -1,5 +1,10 @@
 local state = require "main.state.game"
 
+local ore_img_map = {
+	[state.ReverseTileTypeEnum[state.TileTypeEnum.IRON_ORE]] = "silver-ore_1",
+	[state.ReverseTileTypeEnum[state.TileTypeEnum.GOLD_ORE]] = "gold-ore_1"
+}
+
 local function select_tool(index)
 	local active_tool_id = state.game_state[state.StateEnum.Player.SelectedTool]
 	local active_tool_node = nil
@@ -79,7 +84,7 @@ local function init_inventory(self)
 			gui.set_id(resource_count_text_node, "cell_"..i.."_text")
 			gui.set_scale(resource_count_text_node, vmath.vector3(1.7, 1.7, 0))
 
-			local resource_image = gui.new_box_node(vmath.vector3(0, 0, 0), vmath.vector3(50, 50, 0))
+			local resource_image = gui.new_box_node(vmath.vector3(0, 0, 0), vmath.vector3(35, 35, 0))
 			gui.set_id(resource_image, "cell_"..i.."_type")
 			
 			gui.set_parent(resource_count_text_node, cell_node)
@@ -113,8 +118,7 @@ local function update_inventory_items()
 			-- Update the text node with the current count
 			gui.set_text(resource_count_text_node, tostring(resource.count))
 			gui.set_texture(resource_image_node, "resources")
-			-- TODO: parametirize this to accept a parameter of resource type
-			gui.play_flipbook(resource_image_node, "ore")
+			gui.play_flipbook(resource_image_node, ore_img_map[key])
 		else
 			gui.set_text(resource_count_text_node, "")
 		end
