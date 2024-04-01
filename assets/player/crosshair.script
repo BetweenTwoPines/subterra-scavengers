@@ -1,79 +1,24 @@
 local state = require "main.state.game"
-local rendercam = require "rendercam.rendercam"
 update_crosshair_position = hash("update_crosshair_position")
 
 local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
 
 function init(self)
-
+	msg.post(".", "acquire_input_focus")
+	defos.set_cursor_visible(false)
 end
-
-function final(self)
-	-- Add finalization code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
-end
-
-function update(self, dt)
-	-- reset active node
-	-- state.game_state.set_state_property(state.StateEnum.Level.MouseOverTileHash, nil)
-
-end
-
-function fixed_update(self, dt)
-	-- This function is called if 'Fixed Update Frequency' is enabled in the Engine section of game.project
-	-- Can be coupled with fixed updates of the physics simulation if 'Use Fixed Timestep' is enabled in
-	-- Physics section of game.project
-	-- Add update code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
-end
-
-
 
 function on_message(self, message_id, message, sender)
-	if message_id == update_crosshair_position then
-		local player_pos = message.player_pos
-		-- Convert the mouse screen coordinates to world coordinates
-		local new_position = rendercam.screen_to_world_2d(message.x, message.y, false, 1)
-
-		-- Calculate the vector from the player to the new position
-		local dx = new_position.x - player_pos.x
-		local dy = new_position.y - player_pos.y
-		
-		-- Calculate the distance between the new position and the player
-		local distance = math.sqrt(dx * dx + dy * dy)
-
-		-- If the distance is greater than TILE_SIZE pixels, constrain the position
-		if distance > TILE_SIZE then
-			-- Calculate the normalized direction vector
-			local norm_dx = dx / distance
-			local norm_dy = dy / distance
-			-- Set the new position to be on the edge of the 64 pixel radius circle around the player
-			new_position.x = player_pos.x + TILE_SIZE * norm_dx
-			new_position.y = player_pos.y + TILE_SIZE * norm_dy
-		end
-		msg.post("gui#ui", "debug_coordinates", {x = new_position.x / TILE_SIZE, y = new_position.y / TILE_SIZE})
-		go.set_position(new_position)
-	elseif message_id == hash("hit") then
+	if message_id == hash("hit") then
 		particlefx.play("#tile_hit")
+	elseif message_id == hash("response_data") then
+		go.set_position(vmath.vector3(message.result.x, message.result.y, 0.5))
 	end
 end
 
 function on_input(self, action_id, action)
-	-- Add input-handling code here. The game object this script is attached to
-	-- must have acquired input focus:
-	--
-	--    msg.post(".", "acquire_input_focus")
-	--
-	-- All mapped input bindings will be received. Mouse and touch input will
-	-- be received regardless of where on the screen it happened.
-	-- Learn more: https://defold.com/manuals/input/
-	-- Remove this function if not needed
-end
-
-function on_reload(self)
-	-- Add reload-handling code here
-	-- Learn more: https://defold.com/manuals/hot-reload/
-	-- Remove this function if not needed
+	-- Capture mouse movement
+	if action_id == nil and action.x and action.y then -- If there's mouse movement
+		msg.post("@render:", "screen_to_world", { x = action.x, y = action.y, response_url = msg.url() })
+	end
 end
