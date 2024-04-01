@@ -199,10 +199,8 @@ function on_message(self, message_id, message, sender)
 		viewport[message.key] = nil
 	elseif message_id == hash("create_ore") then
 		local pos = go.get_position(message.key)
-		print("NEW POSITION CREATED", pos.x, pos.y)
 		local pos_rounded = vmath.vector3(math.floor(pos.x / TILE_SIZE), math.floor(pos.y / TILE_SIZE),0)
 		local key = get_key(pos_rounded.x, pos_rounded.y)
-		print("CREATE ORE KEY", key)
 		ore_viewport[key] = {
 			id = message.key,
 			x_floor = pos_rounded.x,
@@ -210,7 +208,6 @@ function on_message(self, message_id, message, sender)
 			y = pos.y,
 			x = pos.x,
 		}
-		pprint("view_port", ore_viewport)
 	elseif message_id == hash("delete_ore") then
 		ore_viewport[message.id] = nil
 	elseif message_id == hash("reset_previous_state") then
