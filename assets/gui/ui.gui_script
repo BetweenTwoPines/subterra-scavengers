@@ -173,6 +173,10 @@ function on_message(self, message_id, message, sender)
 	elseif message_id == hash("update_heatlh") then
 		local health_remaining_ratio = state.game_state[state.StateEnum.Player.CurrentHealth] / state.game_state[state.StateEnum.Player.MaxHealth]
 		update_bar(self, "health_bar_bg", self.health_bar_bg_size, health_remaining_ratio)
+	elseif message_id == hash("debug_coordinates") then
+		gui.set_text(gui.get_node("debug_coordinates"), ("x: %d, y: %d"):format(message.x, message.y))
+	elseif message_id == hash("debug_water_level") then
+		gui.set_text(gui.get_node("debug_water_level_rising"), "Water rising: yes")
 	elseif message_id == hash("update_round_timer") then
 		update_round_timer(self, message.timeleft)
 	elseif message_id == hash("select_belt_tool") then

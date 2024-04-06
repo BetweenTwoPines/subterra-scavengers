@@ -14,6 +14,10 @@ images {
   image: "/assets/raw_assets/background_plain.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
+images {
+  image: "/assets/background/water.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
 animations {
   id: "oak_tree_animation"
   images {

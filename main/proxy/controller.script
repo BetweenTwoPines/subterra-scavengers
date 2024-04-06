@@ -16,6 +16,8 @@ function init(self)
 	msg.post(".", "acquire_input_focus")
 	self.current_proxy = nil
 	self.timer = max_round_time
+	-- water will start rising after 80% of the time has gone by
+	self.water_level_rise_start_time = max_round_time * 0.2
 	self.round_loaded = false
 	msg.post("#", "load_menu")
 end
@@ -27,6 +29,10 @@ function update(self, dt)
 		-- Only update time when the actual level is loaded
 		if self.current_proxy and self.current_proxy.fragment == hash("levelproxy")  then
 			msg.post("main:/gui#ui", "update_round_timer", {timeleft = self.timer})
+			-- Notify water GO to start rising
+			if self.timer <= self.water_level_rise_start_time then
+				msg.post("main:/background/water#water", "start")
+			end
 		end
 		if self.timer <= 0 then
 			self.round_loaded = false

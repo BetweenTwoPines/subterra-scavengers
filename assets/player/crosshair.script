@@ -11,7 +11,7 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash("hit") then
 		particlefx.play("#tile_hit")
-	elseif message_id == hash("response_data") then
+	elseif message_id == hash("screen_to_world_response") then
 		go.set_position(vmath.vector3(message.result.x, message.result.y, 0.5))
 	end
 end
