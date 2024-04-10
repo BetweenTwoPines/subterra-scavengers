@@ -13,35 +13,10 @@ local function update_gui_values(self)
 	gui.set_text(gui.get_node("health_value"), state.game_state[state.StateEnum.Player.MaxHealth])
 
 	-- Set players speed
-	gui.set_text(gui.get_node("speed_value"), state.game_state[state.StateEnum.Player.MaxSpeed])
+	-- gui.set_text(gui.get_node("speed_value"), state.game_state[state.StateEnum.Player.MaxSpeed])
 
 	-- Set players speed
-	gui.set_text(gui.get_node("money_value"), "$" .. state.game_state[state.StateEnum.Player.Coins])
-end
-
--- Dynamically generates inventory grid based on on the position of initial node
-local function create_inventory_grid(self)
-	local cell_id = hash("inventory_cell") -- The original cell node ID
-	local initial_node = gui.get_node(cell_id)
-	local cell_position = gui.get_position(initial_node)
-	
-	for row = 1, state.game_state[state.StateEnum.Inventory.Row] do
-		for col = 1, state.game_state[state.StateEnum.Inventory.Col] do
-			-- avoid duplicating initial_node
-			if row ~= 1 or col ~= 1 then
-				-- Clone the inventory_cell node
-				local cloned_nodes = gui.clone_tree(initial_node)
-				local cloned_cell_id = cloned_nodes[cell_id]
-
-				local x_pos = ((col - 1) * 30) + cell_position.x
-				local y_pos = ((row - 1) * -20) + cell_position.y
-				local position = vmath.vector3(x_pos, y_pos, 0) -- Assuming top-down layout
-
-				-- Set the position of the cloned cell
-				gui.set_position(cloned_cell_id, position)
-			end
-		end
-	end
+	gui.set_text(gui.get_node("money_value"), state.game_state[state.StateEnum.Player.Coins])
 end
 
 -- Adjust conversion rates
@@ -72,7 +47,6 @@ function init(self)
 	msg.post(".", "acquire_input_focus")
 
 	calculate_earnings()
-	create_inventory_grid(self)
 	update_gui_values(self)
 end
 
