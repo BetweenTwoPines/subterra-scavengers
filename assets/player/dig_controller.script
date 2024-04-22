@@ -32,7 +32,7 @@ function on_input(self, action_id, action)
 		msg.post(msg.url("/player/player#player"), "tool_hit")
 		if hoveredOverNode then
 			local tile = state.game_state[state.StateEnum.Level.Tiles][key]
-			particlefx.play("#tile_hit")
+			msg.post("/crosshair", "hit")
 			msg.post("#energy_controller", "update_energy", {energyUsed = -1})
 			local hitpoints = tile.hitpoints - 50
 			tile.hitpoints = hitpoints

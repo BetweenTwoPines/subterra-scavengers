@@ -10,10 +10,6 @@ function init(self)
 	end
 end
 
-function update(self)
-	
-end
-
 local function set_tint(opacity)
 	tint = vmath.vector4(1, 1, 1, opacity)
 	go.set("#selected_overlay", "tint", tint)
@@ -22,12 +18,14 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash("trigger_response") then
 		if message.other_group == hash("crosshair") then
-			local tint
+			local tint = vmath.vector4(1, 1, 1, 0) -- default to no tint
 			if message.enter then
+				-- apply tint to tile thats hovered over
 				tint = vmath.vector4(1, 1, 1, .3)
 				state.game_state[state.StateEnum.Level.MouseOverTileHash] = go.get_id()
-			else
-				tint = vmath.vector4(1, 1, 1, 0)
+			elseif not message.enter and state.game_state[state.StateEnum.Level.MouseOverTileHash] == go.get_id() then
+				-- Make sure we clear state only when the MouseOverTileHash is current GO
+				-- Otherwise it may overwrite NEW MouseOverTileHash GO sicne onleave runs after NEW onenter
 				state.game_state[state.StateEnum.Level.MouseOverTileHash] = nil
 			end
 			go.set("#selected_overlay", "tint", tint)
