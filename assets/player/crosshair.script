@@ -13,12 +13,13 @@ function on_message(self, message_id, message, sender)
 		particlefx.play("#tile_hit")
 	elseif message_id == hash("response_data") then
 		go.set_position(vmath.vector3(message.result.x, message.result.y, 0.5))
+		msg.post("/lights/lights#flashlight", "rotate_light", { pos = go.get_position() })
 	end
 end
 
 function on_input(self, action_id, action)
 	-- Capture mouse movement
 	if action_id == nil and action.x and action.y then -- If there's mouse movement
-	msg.post("@render:", "screen_to_world", { x = action.x, y = action.y, response_url = msg.url() })
+		msg.post("@render:", "screen_to_world", { x = action.x, y = action.y, response_url = msg.url() })
 	end
 end

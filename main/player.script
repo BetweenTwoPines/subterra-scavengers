@@ -81,6 +81,7 @@ local function apply_damage(self, fall_distance)
 end
 
 function update(self, dt)
+	msg.post("/lights/lights#flashlight", "move_light", { pos = go.get_position() })
 	-- apply gravity
 	self.velocity.y = self.velocity.y + gravity * dt
 
