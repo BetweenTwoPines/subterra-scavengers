@@ -89,6 +89,10 @@ function update(self, dt)
 	local pos = go.get_position()
 	pos = pos + self.velocity * dt
 	go.set_position(pos)
+	-- y velocity is never 0, for perfomance reasons only update Y in reder when needed
+	if self.velocity.y < -20 or self.velocity.y > 10 then
+		msg.post("@render:", "update_player_position", { y = pos.y })
+	end
 
 	if not self.ground_contact and self.velocity.y < 0 then -- The player is in the air and moving downwards
 		if not self.is_falling then -- The fall has just started
