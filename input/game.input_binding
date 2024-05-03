@@ -30,6 +30,10 @@ key_trigger {
   input: KEY_TAB
   action: "toggle_inventory"
 }
+key_trigger {
+  input: KEY_F
+  action: "toggle_flashlight"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_LEFT
   action: "interact"

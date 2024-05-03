@@ -1,29 +1,6 @@
 function init(self)
-	-- Add initialization code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
 	self.player_pos = go.get_position()
-end
-
-function final(self)
-	-- Add finalization code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
-end
-
-function update(self, dt)
-	-- Add update code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
-end
-
-function fixed_update(self, dt)
-	-- This function is called if 'Fixed Update Frequency' is enabled in the Engine section of game.project
-	-- Can be coupled with fixed updates of the physics simulation if 'Use Fixed Timestep' is enabled in
-	-- Physics section of game.project
-	-- Add update code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
+	self.enabled = false
 end
 
 function on_message(self, message_id, message, sender)
@@ -34,6 +11,13 @@ function on_message(self, message_id, message, sender)
 		local direction = message.pos - self.player_pos
 		local angle = math.atan2(direction.y, direction.x)
 		go.set_rotation(vmath.quat_rotation_z(angle))
+	elseif message_id == hash("toggle") then
+		if self.enabled then
+			msg.post(".", "disable")
+		else
+			msg.post(".", "enable")
+		end
+		self.enabled = not self.enabled
 	end
 	-- Add message-handling code here
 	-- Learn more: https://defold.com/manuals/message-passing/

@@ -218,6 +218,8 @@ function on_input(self, action_id, action)
 		msg.post("/gui#ui", "select_belt_tool", {item_number = 1})
 	elseif action_id == hash("toggle_inventory") and action.pressed then
 		msg.post("/gui#ui", "toggle_inventory")
+	elseif action_id == hash("toggle_flashlight") and action.pressed then
+		msg.post("/lights/lights#flashlight", "toggle")
 	elseif action_id == hash("escape") then
 		msg.post("@system:", "exit", {code = 0})
 	end
