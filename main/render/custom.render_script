@@ -208,6 +208,12 @@ function update(self)
 	render_to_render_target(self.render_target_world, function()
 		clear_with_color(state.clear_buffers[render.BUFFER_COLOR_BIT])
 
+		-- if self.debug_line then
+		-- 	-- render.set_color(vmath.vector4(1, 0, 0, 1))  -- Red color for visibility
+		-- 	pprint("LINE", self.debug_line)
+		-- 	render.draw_line(self.debug_line.from, self.debug_line.to, vmath.vector4(1, 0, 0, 1))
+		-- end
+
 		-- set states used for all the world predicates
 		render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
 		render.enable_state(render.STATE_DEPTH_TEST)
@@ -263,7 +269,7 @@ function update(self)
 	render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
 	render.disable_state(render.STATE_CULL_FACE)
 
-	render.enable_material(hash("testing"))
+	render.enable_material(hash("lights"))
 
 	render.enable_texture(0, self.render_target_world, render.BUFFER_COLOR0_BIT)
 	render.enable_texture(1, self.render_target_lights, render.BUFFER_COLOR0_BIT)
@@ -344,6 +350,12 @@ function on_message(self, message_id, message)
 	elseif message_id == hash("update_player_position") then
 		self.player_y = message.y
 		handle_world_light(self)
+	elseif message_id == hash("flashlight_cone_collision_ray") then
+		self.max_light_distance = message.fraction
+		self.light_pos = message.pos
+	elseif message_id == hash("draw_debug_line") then
+		-- Helper to debug render things
+		self.debug_line = {from = message.from, to = message.to}
 	elseif message_id == hash("screen_to_world") then
 		-- Send a response back to the sender
 		if message.response_url then

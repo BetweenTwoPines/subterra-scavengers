@@ -5,7 +5,6 @@ varying mediump vec4 var_light;
 
 uniform lowp sampler2D tex0;
 uniform lowp sampler2D tex1;
-uniform lowp vec4 tint;
 
 void main()
 {

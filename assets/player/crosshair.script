@@ -13,7 +13,7 @@ function on_message(self, message_id, message, sender)
 		particlefx.play("#tile_hit")
 	elseif message_id == hash("response_data") then
 		go.set_position(vmath.vector3(message.result.x, message.result.y, 0.5))
-		msg.post("/lights/lights#flashlight", "rotate_light", { pos = go.get_position() })
+		msg.post("/lights/lights#flashlight", "rotate_light", { cursor_pos = go.get_position() })
 	end
 end
 

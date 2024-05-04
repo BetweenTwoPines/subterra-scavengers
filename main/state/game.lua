@@ -410,7 +410,7 @@ STATE.ResourceWeightMap = {
 
 STATE.game_state = {
 	[STATE.StateEnum.Physics.Gravity] = -1900,
-	[STATE.StateEnum.Player.MaxEnergy] = 50,
+	[STATE.StateEnum.Player.MaxEnergy] = 9999999,
 	[STATE.StateEnum.Player.CurrentEnergy] = 50,
 	[STATE.StateEnum.Player.MaxSpeed] = 150,
 	[STATE.StateEnum.Player.MaxHealth] = 100,
