@@ -17,7 +17,7 @@ function init(self)
 	self.current_proxy = nil
 	self.timer = max_round_time
 	self.round_loaded = false
-	msg.post("#", "load_level")
+	msg.post("#", "load_menu")
 end
 
 function update(self, dt)

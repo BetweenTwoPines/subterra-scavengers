@@ -208,12 +208,6 @@ function update(self)
 	render_to_render_target(self.render_target_world, function()
 		clear_with_color(state.clear_buffers[render.BUFFER_COLOR_BIT])
 
-		-- if self.debug_line then
-		-- 	-- render.set_color(vmath.vector4(1, 0, 0, 1))  -- Red color for visibility
-		-- 	pprint("LINE", self.debug_line)
-		-- 	render.draw_line(self.debug_line.from, self.debug_line.to, vmath.vector4(1, 0, 0, 1))
-		-- end
-
 		-- set states used for all the world predicates
 		render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
 		render.enable_state(render.STATE_DEPTH_TEST)
