@@ -127,30 +127,33 @@ local function update_inventory_items()
 end
 
 function init(self)
-	-- Save energy bar node so we can scale it based on players energy
-	self.player_energy_node = gui.get_node("player_energy")
-	-- Remember initial width of the node so we can reset it back to it when energy resets
-	self.energy_bar_intial_scale = gui.get_scale(self.player_energy_node).x
+	-- Save original size of the bar
+	self.energy_bar_bg_size = gui.get(gui.get_node("energy_bar_bg"), "size")
+	self.health_bar_bg_size = gui.get(gui.get_node("health_bar_bg"), "size")
 	self.inventory_open = false
 	self.inventory_initial_position = nil
 
 	render_belt_equipment()
 	init_inventory(self)
-
-	-- TODO: Remove these once debug texts are removed
-	msg.post("/gui#ui", "debug_health")
 end
 
-function update(self)
-	
-end
+local function update_bar(self, node_id, bar_bg_size, scale_ratio)
+	local bar_node = gui.get_node(node_id)
+	local current_size = gui.get(bar_node, "size")
+	local current_pos = gui.get_position(bar_node)
 
-local function update_energy_bar(self, energyBarScaleRatio)
-	-- because energy bar's scale is not 1 we need to multiple by its intial scale
-	local fill_percentage = energyBarScaleRatio * self.energy_bar_intial_scale
-	local current_scale = gui.get_scale(self.player_energy_node)
-	local new_scale = vmath.vector3(fill_percentage, current_scale.y, current_scale.z)
-	gui.set_scale(self.player_energy_node, new_scale)
+	-- Calculate the new width based on the scale ratio
+	local new_width = bar_bg_size.x * scale_ratio
+
+	-- Update the node's size
+	gui.set_size(bar_node, vmath.vector3(new_width, bar_bg_size.y, 0))
+
+	-- Calculate the horizontal shift to anchor the left side
+	local shift = (current_size.x - new_width) / 2
+	current_pos.x = current_pos.x - shift
+
+	-- Update the node's position
+	gui.set_position(bar_node, current_pos)
 end
 
 local function update_round_timer(self, timeleft)
@@ -164,13 +167,12 @@ end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("use_energy") then
-		update_energy_bar(self, message.energyRemainingRatio)
+		update_bar(self, "energy_bar_bg", self.energy_bar_bg_size, message.energyRemainingRatio)
 	elseif message_id == hash("debug_tile_count") then
 		gui.set_text(gui.get_node("debug_tile_count"), ("total: %d, visible: %d"):format(message.total, message.visible))
-	elseif message_id == hash("debug_coordinates") then
-		gui.set_text(gui.get_node("debug_coordinates"), ("x: %d, y: %d"):format(message.x, message.y))
-	elseif message_id == hash("debug_health") then
-		gui.set_text(gui.get_node("debug_health"), "Health: " .. math.floor(state.game_state[state.StateEnum.Player.CurrentHealth]) or 0)
+	elseif message_id == hash("update_heatlh") then
+		local health_remaining_ratio = state.game_state[state.StateEnum.Player.CurrentHealth] / state.game_state[state.StateEnum.Player.MaxHealth]
+		update_bar(self, "health_bar_bg", self.health_bar_bg_size, health_remaining_ratio)
 	elseif message_id == hash("update_round_timer") then
 		update_round_timer(self, message.timeleft)
 	elseif message_id == hash("select_belt_tool") then
