@@ -76,7 +76,7 @@ local function apply_damage(self, fall_distance)
 		msg.post("proxy:/controller#controller", "load_menu")
 	else
 		state.game_state[state.StateEnum.Player.CurrentHealth] = newHealth
-		msg.post("/gui#ui", "debug_health")
+		msg.post("/gui#ui", "update_heatlh")
 	end
 end
 
