@@ -14,6 +14,25 @@ images {
   image: "/assets/raw_assets/background_plain.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
+animations {
+  id: "oak_tree_animation"
+  images {
+    image: "/assets/background/tree_1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/background/tree_2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/background/tree_3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 3
+  flip_horizontal: 0
+  flip_vertical: 0
+}
 margin: 0
 extrude_borders: 2
 inner_padding: 0

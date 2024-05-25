@@ -20,11 +20,11 @@ collection_instances {
   }
 }
 collection_instances {
-  id: "background"
-  collection: "/assets/background/background.collection"
+  id: "scene"
+  collection: "/assets/background/scene.collection"
   position {
-    x: 600.0
-    y: 172.0
+    x: 52.0
+    y: 128.0
     z: 0.0
   }
   rotation {

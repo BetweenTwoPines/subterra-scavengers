@@ -1,0 +1,21 @@
+go.property('index', 1)
+
+function init(self)
+	local scale = { 1, 1.5, 2 }
+	go.set_scale(scale[self.index])
+	
+	local flip = math.random(0, 1)
+	sprite.set_hflip("#sprite", flip)
+end
+
+function update(self, dt)
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Learn more: https://defold.com/manuals/message-passing/
+	-- Remove this function if not needed
+end
