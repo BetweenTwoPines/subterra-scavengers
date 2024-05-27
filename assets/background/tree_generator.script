@@ -1,0 +1,85 @@
+local SCREEN_WIDTH = sys.get_config("display.width")
+-- FIXME: Temporary hardcoded values until i can figure out how to calculate the bottom of the tree root
+local OFFSET_Y = { 40, 95, 145 }
+local RENDERED_TREE_MAP = {};
+local TREE_WIDTH = 250 -- minimal distance between tree sprites
+
+local function can_create_tree(self, tree_index, pos)
+	-- Check if new tree position is far enough from previous tree
+	for _, tree_data in pairs(RENDERED_TREE_MAP) do
+		if math.abs(tree_data.pos.x - pos.x) < TREE_WIDTH then
+			return false
+		end
+	end
+	
+	-- Do not create trees between already created trees
+	if pos.x > self.min_x and pos.x < self.max_x then
+		return false
+	end
+	return true
+end
+
+local function render_tree(self, pos, tree_index)
+	if can_create_tree(self, tree_index, pos) then
+		local tree = factory.create("#factory", pos, nil, { index = tree_index });
+		RENDERED_TREE_MAP[tree] = {pos = pos, out_of_view_port = false, index = tree_index };
+		if pos.x > self.max_x then
+			self.max_x = pos.x;
+		elseif pos.x < self.min_x then
+			self.min_x = pos.x;
+		end
+	end
+end
+
+local function create_tree(self, generation_range)
+	-- TODO: randomize
+	local tree_index = 3;
+	if generation_range == nil then
+		local player = go.get_position('/player/player#player');
+		
+		-- render trees outside of the rightmost side of viewport
+		local x_right = math.random(player.x + (SCREEN_WIDTH / 2), player.x + (SCREEN_WIDTH / 2) + 500);
+		local pos_right = vmath.vector3(x_right, self.HORIZON_Y + OFFSET_Y[tree_index], 0);
+		render_tree(self, pos_right, tree_index)
+
+		-- render trees outside of the leftmost side of viewport
+		local x_left = math.random(player.x - (SCREEN_WIDTH / 2) - 500, player.x - (SCREEN_WIDTH / 2));
+		local pos_left = vmath.vector3(x_left, self.HORIZON_Y + OFFSET_Y[tree_index], 0);
+		render_tree(self, pos_left, tree_index)
+	else
+		local rand_x = math.random(generation_range.from, generation_range.to);
+		local pos = vmath.vector3(rand_x, self.HORIZON_Y + OFFSET_Y[tree_index], 0)
+		render_tree(self, pos, tree_index)
+	end
+end
+
+function init(self)
+	local player = go.get_position('/player/player#player')
+	
+	self.max_x = player.x; -- tracks position of the leftmost tree coordinate
+	self.min_x = player.x; -- tracks position of the rightmost tree coordinate
+	self.HORIZON_Y = player.y; -- y-coord for tree placement
+	self.timer = 0;
+	
+	-- TODO: improve this
+	local generation_range = {from = player.x - (SCREEN_WIDTH / 2), to = player.x + (SCREEN_WIDTH / 2)}
+	create_tree(self, generation_range)
+	create_tree(self, generation_range)
+	create_tree(self, generation_range)
+	create_tree(self, generation_range)
+	create_tree(self, generation_range)
+end
+
+function update(self, dt)
+	if self.timer > 3 then
+		create_tree(self);
+		self.timer = 0;
+	end
+	self.timer = self.timer + dt;
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Learn more: https://defold.com/manuals/message-passing/
+	-- Remove this function if not needed
+end

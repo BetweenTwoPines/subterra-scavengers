@@ -3,8 +3,8 @@ scale_along_z: 0
 embedded_instances {
   id: "tree_factory"
   data: "components {\n"
-  "  id: \"tree_factory\"\n"
-  "  component: \"/assets/background/tree_factory.script\"\n"
+  "  id: \"tree_generator\"\n"
+  "  component: \"/assets/background/tree_generator.script\"\n"
   "  position {\n"
   "    x: 0.0\n"
   "    y: 0.0\n"

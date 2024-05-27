@@ -1,11 +1,24 @@
 go.property('index', 1)
 
+local function color_modulation(tree_index)
+	if tree_index == 1 then
+		return vmath.vector4(0.7, 0.7, 0.7, 1)  -- Slightly dull color
+	elseif tree_index == 2 then
+		return vmath.vector4(0.5, 0.5, 0.5, 1)  -- More dull color
+	else
+		return vmath.vector4(1, 1, 1, 1)        -- Normal color
+	end
+end
+
 function init(self)
 	local scale = { 1, 1.5, 2 }
 	go.set_scale(scale[self.index])
 	
 	local flip = math.random(0, 1)
 	sprite.set_hflip("#sprite", flip)
+
+	local color = color_modulation(self.index)
+	go.set('#sprite', "tint", color)
 end
 
 function update(self, dt)
