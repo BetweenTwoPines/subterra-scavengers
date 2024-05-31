@@ -1,41 +1,31 @@
 local SCREEN_WIDTH = sys.get_config("display.width")
-local RENDERED_TREE_MAP = {};
+local RENDERED_TREE_MAP = {}; -- keep track of all tree objects for
 local TREE_WIDTH = { 25, 50, 250 } -- minimal distance between tree sprites
 
 local function can_create_tree(self, tree_index, pos)
 	-- Check if new tree position is far enough from previous tree
+	-- TODO: this might need improvements
 	for _, tree_data in pairs(RENDERED_TREE_MAP) do
 		if math.abs(tree_data.pos.x - pos.x) < TREE_WIDTH[tree_index] then
 			return false
 		end
 	end
 	
-	if tree_index == 3 then
-		-- Do not create trees between already created trees
-		if pos.x > self.min_x and pos.x < self.max_x then
-			return false
-		end
+	-- Do not generate trees where we have already generated them
+	if pos.x > self.min_x and pos.x < self.max_x then
+		return false
 	end
 	return true
 end
 
 local function render_tree(self, pos, tree_index)
 	if can_create_tree(self, tree_index, pos) then
-		local tree = factory.create("#factory", pos, nil, { index = tree_index });
+		local tree = factory.create("#tree_factory", pos, nil, { index = tree_index });
 		RENDERED_TREE_MAP[tree] = {pos = pos, out_of_view_port = false, index = tree_index };
-		if pos.x > self.max_x then
-			self.max_x = pos.x;
-		elseif pos.x < self.min_x then
-			self.min_x = pos.x;
-		end
 	end
 end
 
 local function create_tree(self, generation_range, tree_index)
-	-- local weighted_tree_indeces = { 1, 1, 1, 2, 2, 2, 3, 3 }
-	-- local tree_index = weighted_tree_indeces[math.random(#weighted_tree_indeces)]
-	-- TODO: randomize
-	-- local tree_index = 3;
 	local player = go.get_position('/player/player#player');
 	if generation_range == nil then
 		-- render trees outside of the rightmost side of viewport
@@ -54,23 +44,48 @@ local function create_tree(self, generation_range, tree_index)
 	end
 end
 
+local function handle_trees_outside_of_viewport(player_pos)
+	for tree, tree_data in pairs(RENDERED_TREE_MAP) do
+		local distance = math.abs(tree_data.pos.x - player_pos.x)
+		if distance > tonumber(SCREEN_WIDTH) and not tree_data.out_of_view_port then
+			-- Cleanup trees outside of view port
+			go.delete(tree)
+			tree_data.out_of_view_port = true;
+		elseif distance < SCREEN_WIDTH / 2 + 100 and tree_data.out_of_view_port then
+			-- Return trees back into viewport
+			local new_tree = factory.create("#tree_factory", vmath.vector3(tree_data.pos.x, tree_data.pos.y, tree_data.pos.z), nil, { index = tree_data.index })
+			tree_data.out_of_view_port = false;
+			RENDERED_TREE_MAP[new_tree] = tree_data
+			RENDERED_TREE_MAP[tree] = nil;
+		end
+	end
+end
+
+-- update boundaries that the generation script has already parsed to avoid re-generation
+local function update_viewport_boundaries(self, pos)
+	if pos.x > self.max_x then
+		self.max_x = pos.x + (SCREEN_WIDTH / 2);
+	end
+	if pos.x < self.min_x then
+		self.min_x = pos.x - (SCREEN_WIDTH / 2);
+	end
+end
+
 function init(self)
 	local player = go.get_position('/player/player#player')
-	
-	self.max_x = player.x; -- tracks position of the leftmost tree coordinate
-	self.min_x = player.x; -- tracks position of the rightmost tree coordinate
-	-- 288 is where the grass is
-	self.HORIZON_Y = 30; -- y-coord for tree placement
+	self.max_x = 0; -- tracks the coord of the farthest position that left side of the screen has been at
+	self.min_x = 0; -- tracks the coord of the farthest position that right side of the screen has been at
 	self.timer = 0;
-	self.direction = 0
+	self.direction = 0;
 	
 	-- TODO: improve this. Generate stuff for everything thats in viewport
-	local generation_range = {from = player.x - (SCREEN_WIDTH / 2), to = player.x + (SCREEN_WIDTH / 2)}
-	create_tree(self, generation_range, 3)
-	create_tree(self, generation_range, 3)
-	create_tree(self, generation_range, 1)
-	create_tree(self, generation_range, 2)
-	create_tree(self, generation_range, 2)
+	local generation_range = {from = player.x - (SCREEN_WIDTH / 2), to = player.x + (SCREEN_WIDTH / 2)};
+	create_tree(self, generation_range, 3);
+	create_tree(self, generation_range, 3);
+	create_tree(self, generation_range, 1);
+	create_tree(self, generation_range, 2);
+	create_tree(self, generation_range, 2);
+	update_viewport_boundaries(self, player);
 end
 
 function update(self, dt)
@@ -82,6 +97,10 @@ function update(self, dt)
 	end
 	self.timer = self.timer + dt;
 	self.direction = 0
+
+	local player_pos = go.get_position('/player/player#player');
+	update_viewport_boundaries(self, player_pos)
+	handle_trees_outside_of_viewport(player_pos)
 end
 
 function on_message(self, message_id, message, sender)
