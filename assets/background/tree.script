@@ -2,21 +2,31 @@ go.property('index', 1)
 
 local function color_modulation(tree_index)
 	if tree_index == 1 then
-		return vmath.vector4(0.7, 0.7, 0.7, 1)  -- Slightly dull color
+		return vmath.vector4(0.5, 0.5, 0.5, 1)  -- Slightly dull color
 	elseif tree_index == 2 then
-		return vmath.vector4(0.5, 0.5, 0.5, 1)  -- More dull color
+		return vmath.vector4(0.8, 0.8, 0.8, 1)  -- More dull color
 	else
 		return vmath.vector4(1, 1, 1, 1)        -- Normal color
 	end
 end
 
 function init(self)
+	self.horizon_y = 29; -- y-coord for tree placement (grass level)
 	local scale = { 1, 1.5, 2 }
-	go.set_scale(scale[self.index])
+	local size = go.get("#sprite", "size")
+	local pos = go.get_position()
 	
+	go.set_scale(scale[self.index])
+
+	-- Align the root of the tree with the grass
+	pos.y = (size.y * scale[self.index] / 2) + self.horizon_y
+	go.set_position(pos)
+
+	-- randomly flip the tree to make them look different somehow
 	local flip = math.random(0, 1)
 	sprite.set_hflip("#sprite", flip)
 
+	-- Apply tint for trees based on distance
 	local color = color_modulation(self.index)
 	go.set('#sprite', "tint", color)
 end

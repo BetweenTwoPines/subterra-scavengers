@@ -23,8 +23,28 @@ collection_instances {
   id: "scene"
   collection: "/assets/background/scene.collection"
   position {
-    x: 52.0
-    y: 128.0
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
+collection_instances {
+  id: "background"
+  collection: "/assets/background/background.collection"
+  position {
+    x: 0.0
+    y: 0.0
     z: 0.0
   }
   rotation {
