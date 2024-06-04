@@ -17,8 +17,6 @@ local hit_left = hash("player_pickaxe_hit_left")
 local hit_right = hash("player_pickaxe_hit_right")
 
 function init(self)
-	msg.post("#camera", "acquire_camera_focus")
-	msg.post("@render:", "use_camera_projection")
 	msg.post(".", "acquire_input_focus")
 
 	self.isHitInProgress = false
@@ -112,6 +110,10 @@ function update(self, dt)
 	self.correction = vmath.vector3()
 	self.ground_contact = false
 	self.wall_contact = false
+	
+	-- Update camera position based on player position
+	msg.post("/camera_container#camera_handler", "update_camera", {pos = go.get_position(), dir = self.facing_direction} )
+	self.facing_direction = 0
 end
 
 local function handle_obstacle_contact(self, normal, distance)
