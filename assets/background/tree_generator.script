@@ -1,0 +1,110 @@
+local SCREEN_WIDTH = sys.get_config("display.width")
+local RENDERED_TREE_MAP = {}; -- keep track of all tree objects for
+local TREE_WIDTH = { 25, 50, 250 } -- minimal distance between tree sprites
+
+local function can_create_tree(self, tree_index, pos)
+	-- Check if new tree position is far enough from previous tree
+	-- TODO: this might need improvements
+	for _, tree_data in pairs(RENDERED_TREE_MAP) do
+		if math.abs(tree_data.pos.x - pos.x) < TREE_WIDTH[tree_index] then
+			return false
+		end
+	end
+	
+	-- Do not generate trees where we have already generated them
+	if pos.x > self.min_x and pos.x < self.max_x then
+		return false
+	end
+	return true
+end
+
+local function render_tree(self, pos, tree_index)
+	if can_create_tree(self, tree_index, pos) then
+		local tree = factory.create("#tree_factory", pos, nil, { index = tree_index });
+		RENDERED_TREE_MAP[tree] = {pos = pos, out_of_view_port = false, index = tree_index };
+	end
+end
+
+local function create_tree(self, generation_range, tree_index)
+	local player = go.get_position('/player/player#player');
+	if generation_range == nil then
+		-- render trees outside of the rightmost side of viewport
+		local x_right = math.random(player.x + (SCREEN_WIDTH / 2), player.x + (SCREEN_WIDTH / 2) + 500);
+		local pos_right = vmath.vector3(x_right, 0, -0.18 + tree_index / 1000);
+		render_tree(self, pos_right, tree_index)
+
+		-- render trees outside of the leftmost side of viewport
+		local x_left = math.random(player.x - (SCREEN_WIDTH / 2) - 500, player.x - (SCREEN_WIDTH / 2));
+		local pos_left = vmath.vector3(x_left, 0, -0.18 + tree_index / 1000);
+		render_tree(self, pos_left, tree_index)
+	else
+		local rand_x = math.random(generation_range.from, generation_range.to);
+		local pos = vmath.vector3(rand_x, 0, -0.18 + tree_index / 1000)
+		render_tree(self, pos, tree_index)
+	end
+end
+
+local function handle_trees_outside_of_viewport(player_pos)
+	for tree, tree_data in pairs(RENDERED_TREE_MAP) do
+		local distance = math.abs(tree_data.pos.x - player_pos.x)
+		if distance > tonumber(SCREEN_WIDTH) and not tree_data.out_of_view_port then
+			-- Cleanup trees outside of view port
+			go.delete(tree)
+			tree_data.out_of_view_port = true;
+		elseif distance < SCREEN_WIDTH / 2 + 100 and tree_data.out_of_view_port then
+			-- Return trees back into viewport
+			local new_tree = factory.create("#tree_factory", vmath.vector3(tree_data.pos.x, tree_data.pos.y, tree_data.pos.z), nil, { index = tree_data.index })
+			tree_data.out_of_view_port = false;
+			RENDERED_TREE_MAP[new_tree] = tree_data
+			RENDERED_TREE_MAP[tree] = nil;
+		end
+	end
+end
+
+-- update boundaries that the generation script has already parsed to avoid re-generation
+local function update_viewport_boundaries(self, pos)
+	if pos.x > self.max_x then
+		self.max_x = pos.x + (SCREEN_WIDTH / 2);
+	end
+	if pos.x < self.min_x then
+		self.min_x = pos.x - (SCREEN_WIDTH / 2);
+	end
+end
+
+function init(self)
+	local player = go.get_position('/player/player#player')
+	self.max_x = 0; -- tracks the coord of the farthest position that left side of the screen has been at
+	self.min_x = 0; -- tracks the coord of the farthest position that right side of the screen has been at
+	self.timer = 0;
+	self.direction = 0;
+	
+	-- TODO: improve this. Generate stuff for everything thats in viewport
+	local generation_range = {from = player.x - (SCREEN_WIDTH / 2), to = player.x + (SCREEN_WIDTH / 2)};
+	create_tree(self, generation_range, 3);
+	create_tree(self, generation_range, 3);
+	create_tree(self, generation_range, 1);
+	create_tree(self, generation_range, 2);
+	create_tree(self, generation_range, 2);
+	update_viewport_boundaries(self, player);
+end
+
+function update(self, dt)
+	if self.timer > 2 and self.direction ~= 0 then
+		create_tree(self, nil, 3);
+		create_tree(self, nil, 2);
+		create_tree(self, nil, 1);
+		self.timer = 0;
+	end
+	self.timer = self.timer + dt;
+	self.direction = 0
+
+	local player_pos = go.get_position('/player/player#player');
+	update_viewport_boundaries(self, player_pos)
+	handle_trees_outside_of_viewport(player_pos)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash('player_moving') then
+		self.direction = message.direction
+	end
+end

@@ -1,5 +1,3 @@
-local TREE_IMAGES = {"left_tree", "middle_tree", "right_tree"}
-local treeline_parallax_speed = 20
 local SKY_IMAGES = {"left_sky", "middle_sky", "right_sky"}
 local skyline_parallax_speed = 5
 local GROUND_IMAGES = {"left_ground", "middle_ground", "right_ground"}
@@ -7,21 +5,16 @@ local ground_parallax_speed = 5
 
 -- Render images so that the player is always in the middle, makes calculations easier
 local function render_on_player(self)
-	go.set_position(vmath.vector3(self.player_pos.x - self.tree_img_size.x, self.player_pos.y + 75, -0.1), "left_tree")
-	go.set_position(vmath.vector3(self.player_pos.x, self.player_pos.y + 75, -0.1), "middle_tree")
-	go.set_position(vmath.vector3(self.player_pos.x + self.tree_img_size.x, self.player_pos.y + 75, -0.1), "right_tree")
+	go.set_position(vmath.vector3(self.player_pos.x - self.sky_img_size.x, self.player_pos.y + 80, -0.2), "left_sky")
+	go.set_position(vmath.vector3(self.player_pos.x, self.player_pos.y + 80, -0.2), "middle_sky")
+	go.set_position(vmath.vector3(self.player_pos.x + self.sky_img_size.x, self.player_pos.y + 80, -0.2), "right_sky")
 
-	go.set_position(vmath.vector3(self.player_pos.x - self.sky_img_size.x, self.player_pos.y + 100, -0.2), "left_sky")
-	go.set_position(vmath.vector3(self.player_pos.x, self.player_pos.y + 100, -0.2), "middle_sky")
-	go.set_position(vmath.vector3(self.player_pos.x + self.sky_img_size.x, self.player_pos.y + 100, -0.2), "right_sky")
-
-	go.set_position(vmath.vector3(self.player_pos.x - self.ground_img_size.x, self.player_pos.y, -0.15), "left_ground")
+	go.set_position(vmath.vector3(self.player_pos.x - self.ground_img_size.x, self.player_pos.y - 65, -0.15), "left_ground")
 	go.set_position(vmath.vector3(self.player_pos.x, self.player_pos.y - 65, -0.15), "middle_ground")
-	go.set_position(vmath.vector3(self.player_pos.x + self.ground_img_size.x, self.player_pos.y, -0.15), "right_ground")
+	go.set_position(vmath.vector3(self.player_pos.x + self.ground_img_size.x, self.player_pos.y - 65, -0.15), "right_ground")
 end
 
 function init(self)
-	self.tree_img_size = go.get("middle_tree#sprite", "size")
 	self.sky_img_size = go.get("middle_sky#sprite", "size")
 	self.ground_img_size = go.get("middle_ground#sprite", "size")
 	self.player_moving = false
@@ -54,8 +47,7 @@ end
 function update(self, dt)
 	-- Only run this when the player is moving to prevent unecessary computations
 	if self.player_moving then
-		apply_parallax(self, TREE_IMAGES, self.tree_img_size, dt, treeline_parallax_speed)
-		apply_parallax(self, SKY_IMAGES, self.tree_img_size, dt, skyline_parallax_speed)
+		apply_parallax(self, SKY_IMAGES, self.sky_img_size, dt, skyline_parallax_speed)
 		apply_parallax(self, GROUND_IMAGES, self.ground_img_size, dt, ground_parallax_speed)
 	end
 	self.player_moving = false

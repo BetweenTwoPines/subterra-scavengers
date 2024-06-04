@@ -23,8 +23,8 @@ collection_instances {
   id: "background"
   collection: "/assets/background/background.collection"
   position {
-    x: 600.0
-    y: 172.0
+    x: 0.0
+    y: 0.0
     z: 0.0
   }
   rotation {
@@ -79,7 +79,24 @@ embedded_instances {
 }
 embedded_instances {
   id: "factory"
-  data: "embedded_components {\n"
+  data: "components {\n"
+  "  id: \"tree_generator\"\n"
+  "  component: \"/assets/background/tree_generator.script\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
+  "  }\n"
+  "  property_decls {\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
   "  id: \"ore_factory\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/assets/resources/ore.go\\\"\\n"
@@ -99,9 +116,9 @@ embedded_instances {
   "  }\n"
   "}\n"
   "embedded_components {\n"
-  "  id: \"factory\"\n"
+  "  id: \"tree_factory\"\n"
   "  type: \"factory\"\n"
-  "  data: \"prototype: \\\"/assets/resources/ore.go\\\"\\n"
+  "  data: \"prototype: \\\"/assets/background/tree.go\\\"\\n"
   "load_dynamically: false\\n"
   "dynamic_prototype: false\\n"
   "\"\n"

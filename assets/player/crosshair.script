@@ -19,6 +19,6 @@ end
 function on_input(self, action_id, action)
 	-- Capture mouse movement
 	if action_id == nil and action.x and action.y then -- If there's mouse movement
-		msg.post("@render:", "screen_to_world", { x = action.x, y = action.y, response_url = msg.url() })
+	msg.post("@render:", "screen_to_world", { x = action.x, y = action.y, response_url = msg.url() })
 	end
 end
