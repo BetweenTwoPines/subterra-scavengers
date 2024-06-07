@@ -354,7 +354,7 @@ function on_message(self, message_id, message)
 		-- Send a response back to the sender
 		if message.response_url then
 			local world_coords = screen_to_world(message.x,message.y, 0, self)
-			msg.post(message.response_url, "response_data", { result = world_coords })
+			msg.post(message.response_url, "screen_to_world_response", { result = world_coords })
 		end
 	end
 end
