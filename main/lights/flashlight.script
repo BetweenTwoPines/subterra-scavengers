@@ -1,4 +1,6 @@
 function init(self)
+	-- flashlight off by defalt
+	msg.post(".", "disable")
 	self.player_pos = go.get_position()
 	self.enabled = false
 	self.angle = 0
@@ -6,7 +8,7 @@ end
 
 local function update_light_position(self)
 	local offset_distance = 90 
-	local offset = vmath.vector3(math.cos(self.angle) * offset_distance, math.sin(self.angle) * offset_distance, 0)
+	local offset = vmath.vector3(math.cos(self.angle) * offset_distance, math.sin(self.angle) * offset_distance, 0.1)
 	go.set_position(self.player_pos + offset)
 end
 

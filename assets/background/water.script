@@ -1,9 +1,8 @@
 local WIDTH = math.floor(tonumber(sys.get_config("display.width")))
-local HEIGHT = math.floor(tonumber(sys.get_config("display.height")))
 
 function init(self)
 	-- No need to render water level initially - since player will be mining down
-	msg.post("#sprite", "disable")
+	msg.post(".", "disable")
 	self.rise_started = false;
 	self.size = go.get("#sprite", "size")
 end
@@ -21,7 +20,7 @@ local function start_water_rise(self, start_at_pos)
 	start_at_pos.z = -0.1
 	go.set_position(start_at_pos)
 	-- Show sprite
-	msg.post("#sprite", "enable")
+	msg.post(".", "enable")
 
 	-- Animate water all the way to the surface line. 10 is the speed of it rising might need to adjust this as needed
 	go.animate(go.get_id(), "position.y", go.PLAYBACK_ONCE_FORWARD, self.size.y * -1, go.EASING_LINEAR, 10)
