@@ -1,1 +1,5 @@
 script: "/main/render/custom.render_script"
+render_resources {
+  name: "lights"
+  path: "/assets/player/materials/quad.material"
+}

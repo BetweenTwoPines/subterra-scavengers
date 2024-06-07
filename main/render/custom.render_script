@@ -136,13 +136,7 @@ local function create_state()
 end
 
 function init(self)
-	self.predicates = create_predicates("tile", "gui", "particle", "model", "debug_text")
-
-	-- default is stretch projection. copy from builtins and change for different projection
-	-- or send a message to the render script to change projection:
-	-- msg.post("@render:", "use_stretch_projection", { near = -1, far = 1 })
-	-- msg.post("@render:", "use_fixed_projection", { near = -1, far = 1, zoom = 2 })
-	-- msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 })
+	self.predicates = create_predicates("tile", "gui", "particle", "model", "debug_text", "light", "quad")
 
 	local state = create_state()
 	self.state = state
@@ -151,6 +145,46 @@ function init(self)
 	local camera_gui = create_camera(state, "camera_gui")
 	init_camera(camera_gui, get_gui_projection)
 	update_state(state)
+
+	self.player_y = 0
+	self.ambient_color = self.state[render.BUFFER_DEPTH_BIT]
+
+	local color_params = { 
+		format = render.FORMAT_RGBA,
+		width = render.get_window_width(),
+		height = render.get_window_height(),
+		min_filter = render.FILTER_LINEAR,
+		mag_filter = render.FILTER_LINEAR,
+		u_wrap = render.WRAP_CLAMP_TO_EDGE,
+		v_wrap = render.WRAP_CLAMP_TO_EDGE
+	}
+
+	local parameters = {
+		[render.BUFFER_COLOR_BIT] = color_params
+	}
+
+	self.render_target_world = render.render_target("player", parameters)
+	self.render_target_lights = render.render_target("lights", parameters)
+end
+
+local IDENTITY_MATRIX = vmath.matrix4()
+
+function render_to_render_target(render_target, draw_function)
+	render.set_render_target(render_target)
+	draw_function()
+	render.set_render_target(render.RENDER_TARGET_DEFAULT)
+end
+
+-- Default clearing of the screen buffers with a given clear color
+--
+local function clear_with_color(clear_color)
+	-- clear screen buffers
+	-- turn on depth_mask before `render.clear()` to clear it as well
+	render.set_depth_mask(true)
+	render.set_stencil_mask(0xff)
+	-- render.clear(clear_color)
+	render.clear({[render.BUFFER_COLOR_BIT] = clear_color, [render.BUFFER_DEPTH_BIT] = 1, [render.BUFFER_STENCIL_BIT] = 0})
+
 end
 
 function update(self)
@@ -162,39 +196,84 @@ function update(self)
 	end
 
 	local predicates = self.predicates
-	-- clear screen buffers
-	--
-	-- turn on depth_mask before `render.clear()` to clear it as well
-	render.set_depth_mask(true)
-	render.set_stencil_mask(0xff)
-	render.clear(state.clear_buffers)
+
+	render.set_viewport(0, 0, state.window_width, state.window_height)
 
 	-- setup camera view and projection
-	--
 	local camera_world = state.cameras.camera_world
-	render.set_viewport(0, 0, state.window_width, state.window_height)
+
 	render.set_view(camera_world.view)
 	render.set_projection(camera_world.proj)
 
-	-- set states used for all the world predicates
-	render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
-	render.enable_state(render.STATE_DEPTH_TEST)
+	render_to_render_target(self.render_target_world, function()
+		clear_with_color(state.clear_buffers[render.BUFFER_COLOR_BIT])
 
-	-- render `model` predicate for default 3D material
+		-- set states used for all the world predicates
+		render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
+		render.enable_state(render.STATE_DEPTH_TEST)
+
+		-- render `model` predicate for default 3D material
+		--
+		render.enable_state(render.STATE_CULL_FACE)
+		render.draw(predicates.model, camera_world.frustum)
+		render.set_depth_mask(false)
+		render.disable_state(render.STATE_CULL_FACE)
+
+		-- render the other components: sprites, tilemaps, particles etc
+		--
+		render.enable_state(render.STATE_BLEND)
+		render.draw(predicates.tile, camera_world.frustum)
+		render.draw(predicates.particle, camera_world.frustum)
+		render.disable_state(render.STATE_DEPTH_TEST)
+
+		render.draw_debug3d()
+
+	end)
+
+	render_to_render_target(self.render_target_lights, function()
+		clear_with_color(self.ambient_color)
+
+		-- set states used for all the world predicates
+		render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
+		render.enable_state(render.STATE_DEPTH_TEST)
+
+		-- render `model` predicate for default 3D material
+		--
+		render.enable_state(render.STATE_CULL_FACE)
+		render.draw(predicates.model, camera_world.frustum)
+		render.set_depth_mask(false)
+		render.disable_state(render.STATE_CULL_FACE)
+
+		-- render the other components: sprites, tilemaps, particles etc
+		--
+		render.enable_state(render.STATE_BLEND)
+		render.draw(predicates.light, camera_world.frustum)
+		render.disable_state(render.STATE_DEPTH_TEST)
+	end)
+
+	-- render to quad
 	--
-	render.enable_state(render.STATE_CULL_FACE)
-	render.draw(predicates.model, camera_world.frustum)
+	render.set_view(IDENTITY_MATRIX)
+	render.set_projection(IDENTITY_MATRIX)
+
 	render.set_depth_mask(false)
+	render.disable_state(render.STATE_DEPTH_TEST)
+	render.disable_state(render.STATE_STENCIL_TEST)
+	render.enable_state(render.STATE_BLEND)
+	render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
 	render.disable_state(render.STATE_CULL_FACE)
 
-	-- render the other components: sprites, tilemaps, particles etc
-	--
-	render.enable_state(render.STATE_BLEND)
-	render.draw(predicates.tile, camera_world.frustum)
-	render.draw(predicates.particle, camera_world.frustum)
-	render.disable_state(render.STATE_DEPTH_TEST)
+	render.enable_material(hash("lights"))
 
-	render.draw_debug3d()
+	render.enable_texture(0, self.render_target_world, render.BUFFER_COLOR0_BIT)
+	render.enable_texture(1, self.render_target_lights, render.BUFFER_COLOR0_BIT)
+
+	render.draw(predicates.quad)
+
+	render.disable_texture(0)
+	render.disable_texture(1)
+
+	render.disable_material()
 
 	-- render GUI
 	--
@@ -220,6 +299,26 @@ local function screen_to_world(x, y, z, self)
 	return vmath.vector3(x1, y1, z1)
 end
 
+-- Calculate ambient color for the world, used for making the world darker as the user moves down into ground
+function handle_world_light(self)
+	if self.player_y and self.player_y < 0 then
+		local max_depth = -300  -- depth at which the color is darkest
+		local depth_ratio = self.player_y / max_depth
+
+		-- Clamp the factor to ensure it's between 0 and 0.85
+		local factor = math.max(0, math.min(depth_ratio, 0.85))
+
+		local white = vmath.vector4(1) -- default, no darkening
+		local dark = vmath.vector4(0, 0, 0, 1)  -- Full black
+		
+		-- Linearly interpolate between white and dark based on the factor
+		local color = white + (dark - white) * factor
+		self.ambient_color = color
+	else
+		self.ambient_color = vmath.vector4(1, 1, 1, 1)
+	end
+end
+
 function on_message(self, message_id, message)
 	local state = self.state
 	local camera = state.main_camera
@@ -242,6 +341,15 @@ function on_message(self, message_id, message)
 	elseif message_id == MSG_USE_FIXED_FIT_PROJ then
 		init_camera(camera, get_fixed_fit_projection, message.near, message.far)
 		update_camera(camera, state)
+	elseif message_id == hash("update_player_position") then
+		self.player_y = message.y
+		handle_world_light(self)
+	elseif message_id == hash("flashlight_cone_collision_ray") then
+		self.max_light_distance = message.fraction
+		self.light_pos = message.pos
+	elseif message_id == hash("draw_debug_line") then
+		-- Helper to debug render things
+		self.debug_line = {from = message.from, to = message.to}
 	elseif message_id == hash("screen_to_world") then
 		-- Send a response back to the sender
 		if message.response_url then

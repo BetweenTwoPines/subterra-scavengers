@@ -2,6 +2,10 @@ images {
   image: "/assets/player/crosshair.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
+images {
+  image: "/assets/player/light-cone.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
 animations {
   id: "player_right"
   images {

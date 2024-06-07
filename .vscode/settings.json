@@ -36,7 +36,8 @@
     ],
     "Lua.workspace.library": [
         "~/Library/Application Support/Code/User/globalStorage/astronachos.defold",
-        "~/Library/Application Support/Code/User/workspaceStorage/d37a1a27b051946fb037343ea3f56a25/astronachos.defold"
+        "~/Library/Application Support/Code/User/workspaceStorage/d37a1a27b051946fb037343ea3f56a25/astronachos.defold",
+        "~/Library/Application Support/Code/User/workspaceStorage/e2f07ffee9d19f80aebe6b6990b5e8f1/astronachos.defold"
     ],
     "files.associations": {
         "*.project": "ini",
@@ -73,6 +74,13 @@
         "*.texture_profiles": "textproto",
         "*.tilemap": "textproto",
         "*.tilesource": "textproto",
-        "*.manifest": "textproto"
+        "*.manifest": "textproto",
+        "*.appmanifest": "yaml",
+        "*.script_api": "yaml",
+        "ext.manifest": "yaml"
+    },
+    "glsllint.additionalStageAssociations": {
+        ".fp": "frag",
+        ".vp": "vert"
     }
 }
