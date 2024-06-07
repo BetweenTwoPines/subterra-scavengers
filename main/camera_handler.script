@@ -6,14 +6,17 @@ function init(self)
 	self.direction = 0
 end
 
+local function center_on_y_axis(self)
+	go.set_position(self.pos)
+end
 
 local function handle_camera_position(self)
 	if self.direction ~= 0 then
 		-- when player is moving set camera ahead of player
-		go.animate(go.get_id(), "position.x", go.PLAYBACK_ONCE_FORWARD, self.pos.x + (200 * self.direction), go.EASING_LINEAR, 1)
+		go.animate(go.get_id(), "position.x", go.PLAYBACK_ONCE_FORWARD, self.pos.x + (200 * self.direction), go.EASING_LINEAR, 1, center_on_y_axis(self))
 	else
 		-- center camera on player
-		go.animate(go.get_id(), "position.x", go.PLAYBACK_ONCE_FORWARD, self.pos.x, go.EASING_LINEAR, 0.5)
+		go.animate(go.get_id(), "position.x", go.PLAYBACK_ONCE_FORWARD, self.pos.x, go.EASING_LINEAR, 0.5, center_on_y_axis(self))
 	end
 
 	self.set_camera = true;

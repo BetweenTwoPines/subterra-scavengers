@@ -3,7 +3,6 @@ local msg_contact_point_response = hash("contact_point_response")
 local group_obstacle = hash("ground")
 -- max speed right/left
 local max_speed = state.game_state.get_state_property(state.StateEnum.Player.MaxSpeed)
-local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
 local gravity = state.game_state.get_state_property(state.StateEnum.Physics.Gravity)
 
 local max_upwards_speed = 500
@@ -153,7 +152,7 @@ local function handle_obstacle_contact(self, normal, distance)
 	end
 end
 
-function notifyEnergyController(self, changeBy)
+local function notifyEnergyController(self, changeBy)
 	msg.post("#energy_controller", "update_energy", {energyUsed = changeBy})
 end
 

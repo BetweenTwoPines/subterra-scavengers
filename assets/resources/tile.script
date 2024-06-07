@@ -10,11 +10,6 @@ function init(self)
 	end
 end
 
-local function set_tint(opacity)
-	tint = vmath.vector4(1, 1, 1, opacity)
-	go.set("#selected_overlay", "tint", tint)
-end
-
 function on_message(self, message_id, message, sender)
 	if message_id == hash("trigger_response") then
 		if message.other_group == hash("crosshair") then
