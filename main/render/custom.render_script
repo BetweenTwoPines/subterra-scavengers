@@ -204,6 +204,7 @@ function update(self)
 
 	render.set_view(camera_world.view)
 	render.set_projection(camera_world.proj)
+	render.clear(state.clear_buffers)
 
 	render_to_render_target(self.render_target_world, function()
 		clear_with_color(state.clear_buffers[render.BUFFER_COLOR_BIT])
