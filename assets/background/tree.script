@@ -1,44 +1,57 @@
 go.property('index', 1)
 
-local function color_modulation(tree_index)
-	if tree_index == 1 then
-		return vmath.vector4(0.5, 0.5, 0.5, 1)  -- Slightly dull color
-	elseif tree_index == 2 then
-		return vmath.vector4(0.8, 0.8, 0.8, 1)  -- More dull color
-	else
-		return vmath.vector4(1, 1, 1, 1)        -- Normal color
-	end
+-- Function to modulate color based on scale
+local function color_modulation(scale)
+	-- Ensure color doesn't fall below vmath.vector4(0.5, 0.5, 0.5, 1)
+	local min_color = 0.5
+	-- Calculate modulation factor and clamp it to the minimum color value
+	local modulation_factor = min_color + (scale / 2) * (1 - min_color)
+	return vmath.vector4(modulation_factor, modulation_factor, modulation_factor, 1)
 end
 
 function init(self)
-	self.horizon_y = 29; -- y-coord for tree placement (grass level)
-	local scale = { 1, 1.5, 2 }
-	local size = go.get("#sprite", "size")
-	local pos = go.get_position()
-	
-	go.set_scale(scale[self.index])
+	-- Disable all srpites by default
+	msg.post("#tree_one", "disable")
+	msg.post("#tree_two", "disable")
+	msg.post("#bush_one", "disable")
+	msg.post("#bush_two", "disable")
+
+	self.horizon_y = 29 -- y-coord for tree placement (grass level)
+	local scale = 0.5 + math.random() * (2 - 0.5)
+	local tree_type_sprite_id = {"#bush_one", "#bush_two", "#tree_two", "#tree_one"}
+
+	-- select a tree based on randomly generated index from tree_generator.script
+	local tree_type = tree_type_sprite_id[self.index]
+
+	-- Enable the sprite to render on screen
+	msg.post(tree_type, "enable")
+
+	-- randomize animation speed and the frame to start the animation from
+	local frame_count = go.get(tree_type, "frame_count")
+	local frame_offset = math.random(0, frame_count)
+	local rate = 1 + math.random() * 1.3 - 1
+	local animation_hash = hash(string.gsub(tree_type, "#", ""))
+	sprite.play_flipbook(tree_type, animation_hash, nil, {offset = frame_offset, playback_rate = rate})
+
+	-- apply random scale on randomly generated index from tree_generator.script
+	go.set_scale(scale)
 
 	-- Align the root of the tree with the grass
-	pos.y = (size.y * scale[self.index] / 2) + self.horizon_y
+	local size = go.get(tree_type, "size")
+	local pos = go.get_position()
+	pos.y = (size.y * scale / 2) + self.horizon_y
 	go.set_position(pos)
 
-	-- randomly flip the tree to make them look different somehow
+	-- render smaller scaled sprites farther out (smaller scale -> lower z-value)
+	local min_z = -1.0
+	local max_z = -0.18
+	pos.z = max_z - (scale - 0.5) * (max_z - min_z) / (2 - 0.5)
+	
+	-- randomly flip the tree to make them look slightly different
 	local flip = math.random(0, 1)
-	sprite.set_hflip("#sprite", flip)
+	sprite.set_hflip(tree_type, flip)
 
 	-- Apply tint for trees based on distance
-	local color = color_modulation(self.index)
-	go.set('#sprite', "tint", color)
-end
-
-function update(self, dt)
-	-- Add update code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
-end
-
-function on_message(self, message_id, message, sender)
-	-- Add message-handling code here
-	-- Learn more: https://defold.com/manuals/message-passing/
-	-- Remove this function if not needed
+	local color = color_modulation(scale)
+	go.set(tree_type, "tint", color)
 end
