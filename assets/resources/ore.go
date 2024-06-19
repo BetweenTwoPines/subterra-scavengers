@@ -37,7 +37,7 @@ embedded_components {
   }
 }
 embedded_components {
-  id: "collisionobject"
+  id: "ore_collision_object"
   type: "collisionobject"
   data: "collision_shape: \"\"\n"
   "type: COLLISION_OBJECT_TYPE_KINEMATIC\n"
@@ -47,6 +47,7 @@ embedded_components {
   "group: \"ore\"\n"
   "mask: \"ground\"\n"
   "mask: \"player\"\n"
+  "mask: \"ore\"\n"
   "embedded_collision_shape {\n"
   "  shapes {\n"
   "    shape_type: TYPE_BOX\n"
