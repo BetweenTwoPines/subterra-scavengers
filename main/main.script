@@ -1,6 +1,5 @@
 local state = require "main.state.game"
 local perlin = require "main.perlin"
-local LAYER1 = hash("layer1")
 
 local TILE_TYPE = state.TileTypeEnum
 local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
@@ -141,16 +140,14 @@ local function update_level(tx, ty)
 					tile_sprite = state.TileSpriteAnimations.DIRT
 				end
 
-				if tyle_type ~= TILE_TYPE.EMPTY then				
-					state.game_state[state.StateEnum.Level.Tiles][key] = {
-						tile_type = tile_type,
-						hitpoints = hitpoints,
-						tile_sprite = tile_sprite,
-						x = x,
-						y = y
-					}
-					total_tiles_count = total_tiles_count + 1
-				end
+				state.game_state[state.StateEnum.Level.Tiles][key] = {
+					tile_type = tile_type,
+					hitpoints = hitpoints,
+					tile_sprite = tile_sprite,
+					x = x,
+					y = y
+				}
+				total_tiles_count = total_tiles_count + 1
 			end
 		end
 	end
@@ -212,6 +209,6 @@ function on_message(self, message_id, message, sender)
 		ore_viewport[message.id] = nil
 	elseif message_id == hash("reset_previous_state") then
 		local key = get_key(message.previous_pos_key.x, message.previous_pos_key.y)
-		table.remove(ore_viewport, key)
+		table.remove(ore_viewport, tonumber(key))
 	end
 end

@@ -1,6 +1,5 @@
 local state = require "main.state.game"
 
-local max_energy = state.game_state.get_state_property(state.StateEnum.Player.MaxEnergy)
 local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
 local TILE_TYPE = state.TileTypeEnum
 
@@ -8,7 +7,7 @@ local function get_key(x, y)
 	return ("%d-%d"):format(x, y)
 end
 
-function update_tile_sprite(x, y)
+local function update_tile_sprite(x, y)
 	local tile = state.game_state[state.StateEnum.Level.Tiles][get_key(x , y)]
 	if tile == nil or tile.id == nil or tile.tile_type == TILE_TYPE.EMPTY then
 		return

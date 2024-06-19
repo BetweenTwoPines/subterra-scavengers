@@ -169,7 +169,7 @@ end
 
 local IDENTITY_MATRIX = vmath.matrix4()
 
-function render_to_render_target(render_target, draw_function)
+local function render_to_render_target(render_target, draw_function)
 	render.set_render_target(render_target)
 	draw_function()
 	render.set_render_target(render.RENDER_TARGET_DEFAULT)
@@ -301,7 +301,7 @@ local function screen_to_world(x, y, z, self)
 end
 
 -- Calculate ambient color for the world, used for making the world darker as the user moves down into ground
-function handle_world_light(self)
+local function handle_world_light(self)
 	if self.player_y and self.player_y < 0 then
 		local max_depth = -300  -- depth at which the color is darkest
 		local depth_ratio = self.player_y / max_depth

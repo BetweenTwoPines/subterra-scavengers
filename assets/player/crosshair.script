@@ -1,8 +1,3 @@
-local state = require "main.state.game"
-update_crosshair_position = hash("update_crosshair_position")
-
-local TILE_SIZE = state.game_state.get_state_property(state.StateEnum.Level.TileSize)
-
 function init(self)
 	msg.post(".", "acquire_input_focus")
 	defos.set_cursor_visible(false)
