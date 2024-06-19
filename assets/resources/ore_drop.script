@@ -7,10 +7,9 @@ local ore_types = {
 
 -- Create and initialize custom game object property
 go.property("ore_type_id", 1)
-go.property("rerender", false)
 
 local gravity = state.game_state.get_state_property(state.StateEnum.Physics.Gravity)
-local initial_ore_drop_velocity = 100
+local ore_animation_pull_speed = 200
 
 function init(self)
 	if self.ore_type_id == state.TileTypeEnum.IRON_ORE then
@@ -19,54 +18,14 @@ function init(self)
 		self.ore_anim = "gold-ore"
 	end
 	sprite.play_flipbook("#sprite", self.ore_anim)
-	if not self.rerender then
-		self.velocity = vmath.vector3(1, 500, 0)
-		self.random_x_axis_acceleration = math.random(-1, 1) * initial_ore_drop_velocity
-	else
-		self.velocity = vmath.vector3(0, 0, 0)
-		self.random_x_axis_acceleration = 0
-	end
-	-- self.velocity = vmath.vector3(1, 500, 0)
+	self.velocity = vmath.vector3(1, 500, 0)
+	self.random_x_axis_acceleration = math.random(-1, 1) * 100
+	
 	self.first_render = true
-	-- self.random_x_axis_acceleration = math.random(-1, 1) * initial_ore_drop_velocity
 	self.correction = vmath.vector3()
 	self.created = false
-end
-
-function update(self, dt)
-	-- Apply gravity to the velocity if the object is not grounded
-	self.velocity.y = self.velocity.y + gravity * dt
-
-	-- Randomize the x direction of travel
-	if self.velocity.x > 0 then
-		self.velocity.x = self.random_x_axis_acceleration
-	end
-
-	-- Update the position of the game object
-	local position = go.get_position()
-	position = position + self.velocity * dt
-	go.set_position(position)
-	
-	-- reset
-	self.grounded = false
-	self.correction = vmath.vector3()
-	self.rerender = false
-end
-
-local function handle_obstacle_contact(self, normal, distance)
-	if distance > 0 then
-		-- First, project the accumulated correction onto
-		-- the penetration vector
-		local proj = vmath.project(self.correction, normal * distance)
-		if proj < 1 then
-			-- Only care for projections that does not overshoot.
-			local comp = (distance - distance * proj) * normal
-			-- Apply compensation
-			go.set_position(go.get_position() + comp)
-			-- Accumulate correction done
-			self.correction = self.correction + comp
-		end
-	end
+	self.pickup_in_progress = false
+	self.animation_in_progress = false
 end
 
 local function pickup(ore_type)
@@ -92,9 +51,74 @@ local function pickup(ore_type)
 	go.delete()
 end
 
+local function animate_pickup(self, dt, ore_position)
+	local player_pos = go.get_position("/player/player#player")
+	player_pos.y = player_pos.y
+	local distance_to_player = vmath.length_sqr(player_pos - ore_position)
+	local direction_to_move = vmath.normalize(player_pos - ore_position)
+
+	if distance_to_player < 10 then
+		if self.animation_in_progress == false then
+			self.animation_in_progress = true
+			go.animate(go.get_id(), "position.y", go.PLAYBACK_ONCE_FORWARD,player_pos.y + 50 , go.EASING_LINEAR, 0.2, 0, function ()
+				go.animate(go.get_id(), "scale", go.PLAYBACK_ONCE_FORWARD, 1.3, go.EASING_LINEAR, 0.4, 0, function ()
+					local ore_type = state.ReverseTileTypeEnum[self.ore_type_id]
+					pickup(ore_type)
+					self.pickup_in_progress = false;
+					self.animation_in_progress = false;
+				end)
+			end)
+		end
+	end
+
+	if self.animation_in_progress == false then
+		go.set_position(ore_position + direction_to_move * ore_animation_pull_speed * dt)
+	end
+end
+
+function update(self, dt)
+	local ore_position = go.get_position()
+	if self.pickup_in_progress then
+		-- Handle pulling ore go towards player
+		animate_pickup(self, dt, ore_position)
+	else 
+		-- Apply gravity to the velocity if the object is not grounded
+		self.velocity.y = self.velocity.y + gravity * dt
+
+		-- Randomize the x direction of travel
+		if self.velocity.x > 0 then
+			self.velocity.x = self.random_x_axis_acceleration
+		end
+
+		-- Update the position of the game object
+		ore_position = ore_position + self.velocity * dt
+		go.set_position(ore_position)
+	end
+	
+	-- reset
+	self.grounded = false
+	self.correction = vmath.vector3()
+end
+
+local function handle_obstacle_contact(self, normal, distance)
+	if distance > 0 then
+		-- First, project the accumulated correction onto
+		-- the penetration vector
+		local proj = vmath.project(self.correction, normal * distance)
+		if proj < 1 then
+			-- Only care for projections that does not overshoot.
+			local comp = (distance - distance * proj) * normal
+			-- Apply compensation
+			go.set_position(go.get_position() + comp)
+			-- Accumulate correction done
+			self.correction = self.correction + comp
+		end
+	end
+end
+
 function on_message(self, message_id, message, sender)
 	if message_id == hash("contact_point_response") then
-		if message.group == hash("ground") then
+		if message.group == hash("ground") or message.group == hash("ore") then
 			-- HACK: For some reason when we first spawn this object, it triggers collison event which causes jittering in gravity
 			-- SKIP first emission
 			if not self.first_render then
@@ -107,17 +131,14 @@ function on_message(self, message_id, message, sender)
 				if message.normal.y > 0.7 then
 					self.velocity.y = 0
 					self.velocity.x = 0
-					if not self.created then
-						msg.post("/main#main", "create_ore", { key = go.get_id()})
-						self.created = true
-					end
 				end
 			else
 				self.first_render = false
 			end
 		elseif message.group == hash("player") then
-			local ore_type = state.ReverseTileTypeEnum[self.ore_type_id]
-			pickup(ore_type)
+			-- Disable collision in order to let ore move freely
+			msg.post("#ore_collision_object", "disable")
+			self.pickup_in_progress = true;
 		end
 	end
 end
