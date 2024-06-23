@@ -2,15 +2,21 @@ local WIDTH = math.floor(tonumber(sys.get_config("display.width")))
 
 function init(self)
 	-- No need to render water level initially - since player will be mining down
-	msg.post(".", "disable")
+	msg.post("sprite", "disable")
+	self.t = 0
 	self.rise_started = false;
-	self.size = go.get("#sprite", "size")
+	self.size = vmath.vector3(2, 2, 0.2)
+end
+
+function update(self, dt)
+	self.t = self.t + dt
+	go.set("sprite#model", "time", vmath.vector4(self.t, 0, 0, 0))
 end
 
 -- Figure out the start pos for water GO so that it is rendered at the viewport y = 0 and in the middle of the screen.
 local function get_start_pos(self)
-	local scale = go.get("water", "scale")
-	local pos_y = (self.size.y * (-1 *scale.y)) / 2
+	local scale = go.get("sprite", "scale")
+	local pos_y = (self.size.y * (-1 * scale.y)) / 2
 	local pos_x = WIDTH / 2
 	msg.post("@render:", "screen_to_world", { x = pos_x, y = pos_y, response_url = msg.url() })
 end
@@ -20,7 +26,7 @@ local function start_water_rise(self, start_at_pos)
 	start_at_pos.z = -0.1
 	go.set_position(start_at_pos)
 	-- Show sprite
-	msg.post(".", "enable")
+	msg.post("sprite", "enable")
 
 	-- Animate water all the way to the surface line. 10 is the speed of it rising might need to adjust this as needed
 	go.animate(go.get_id(), "position.y", go.PLAYBACK_ONCE_FORWARD, self.size.y * -1, go.EASING_LINEAR, 10)
