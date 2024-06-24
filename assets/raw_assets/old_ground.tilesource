@@ -1890,11 +1890,6 @@ animations {
 extrude_borders: 2
 inner_padding: 0
 sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-
-
-
-----------------------------------------------------
-
 image: "/assets/raw_assets/ground.png"
 tile_width: 64
 tile_height: 64
