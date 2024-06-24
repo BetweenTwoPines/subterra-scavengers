@@ -22,8 +22,6 @@ local function get_start_pos(self)
 end
 
 local function start_water_rise(self, start_at_pos)
-	-- render it behind tiles?
-	start_at_pos.z = -0.1
 	go.set_position(start_at_pos)
 	-- Show sprite
 	msg.post("sprite", "enable")
@@ -44,6 +42,6 @@ function on_message(self, message_id, message, sender)
 		end
 	elseif message_id == hash("screen_to_world_response") then
 		self.rise_started = true
-		start_water_rise(self, vmath.vector3(message.result.x, message.result.y, 1))
+		start_water_rise(self, vmath.vector3(message.result.x, message.result.y, 0.1))
 	end
 end
