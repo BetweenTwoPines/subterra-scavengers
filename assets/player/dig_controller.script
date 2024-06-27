@@ -33,7 +33,7 @@ function on_input(self, action_id, action)
 			local tile = state.game_state[state.StateEnum.Level.Tiles][key]
 			msg.post("/crosshair", "hit")
 			msg.post("#energy_controller", "update_energy", {energyUsed = -1})
-			local hitpoints = tile.hitpoints - 50
+			local hitpoints = tile.hitpoints - state.game_state[state.StateEnum.Player.MiningDamage]
 			tile.hitpoints = hitpoints
 			if hitpoints <= 0 then
 				--  empty tiles dont drop anything

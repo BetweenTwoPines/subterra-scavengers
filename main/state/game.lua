@@ -5,6 +5,7 @@ STATE.StateEnum = {
 		MaxEnergy = "player_max_energy",
 		CurrentEnergy = "player_current_energy",
 		MaxSpeed = "player_max_speed",
+		MiningDamage = "player_mining_damage",
 		CurrentHealth = "player_current_health",
 		MaxHealth = "player_max_health",
 		Coins = "player_coins",
@@ -46,6 +47,13 @@ STATE.TileTypeEnum = {
 	DIRT = 1,
 	IRON_ORE = 2,
 	GOLD_ORE = 3,
+}
+
+STATE.TileTypeToHitpoints = {
+	[STATE.TileTypeEnum.EMPTY] = 0,
+	[STATE.TileTypeEnum.DIRT] = 100,
+	[STATE.TileTypeEnum.IRON_ORE] = 150,
+	[STATE.TileTypeEnum.GOLD_ORE] = 200,
 }
 
 STATE.ReverseTileTypeEnum = {
@@ -407,6 +415,7 @@ STATE.game_state = {
 	[STATE.StateEnum.Player.MaxHealth] = 100,
 	[STATE.StateEnum.Player.CurrentHealth] = 100,
 	[STATE.StateEnum.Player.Coins] = 8132714,
+	[STATE.StateEnum.Player.MiningDamage] = 50,
 	[STATE.StateEnum.Player.BeltItems] = {"rusty_pickaxe"},
 	[STATE.StateEnum.Player.SelectedTool] = nil,
 	[STATE.StateEnum.Inventory.Row] = 2,
@@ -433,27 +442,30 @@ function STATE.get_sprite(x, y)
 	
 	local current_tile = map[get_key(x, y)]
 	
-    local top_tile = map[get_key(x, y + 1)]
-    local left_tile = map[get_key(x - 1, y)]
-    local right_tile = map[get_key(x + 1, y)]
-    local bottom_tile = map[get_key(x, y - 1)]
-    
-    local grass = y == 0 and "~" or ""
-    local top = (top_tile ~= nil and top_tile.tile_type == STATE.TileTypeEnum.EMPTY) and "0" or "1"
-    local right = (right_tile ~= nil and right_tile.tile_type == STATE.TileTypeEnum.EMPTY) and "0" or "1"
+	local top_tile = map[get_key(x, y + 1)]
+	local left_tile = map[get_key(x - 1, y)]
+	local right_tile = map[get_key(x + 1, y)]
+	local bottom_tile = map[get_key(x, y - 1)]
+
+	local grass = y == 0 and "~" or ""
+	local top = (top_tile ~= nil and top_tile.tile_type == STATE.TileTypeEnum.EMPTY) and "0" or "1"
+	local right = (right_tile ~= nil and right_tile.tile_type == STATE.TileTypeEnum.EMPTY) and "0" or "1"
 	local bottom = (bottom_tile ~= nil and bottom_tile.tile_type == STATE.TileTypeEnum.EMPTY) and "0" or "1"
-    local left = (left_tile ~= nil and left_tile.tile_type == STATE.TileTypeEnum.EMPTY) and "0" or "1"
+	local left = (left_tile ~= nil and left_tile.tile_type == STATE.TileTypeEnum.EMPTY) and "0" or "1"
 
 	local tile_type = "-0" .. current_tile.tile_type
 	
-    local crack_level = ""
+	local crack_level = ""
 
-	if (current_tile.hitpoints ~= nil) then
-		if current_tile.hitpoints < 200 and current_tile.hitpoints >= 150 then
+	if current_tile.hitpoints ~= nil and current_tile.hitpoints ~= STATE.TileTypeToHitpoints[current_tile.tile_type] then
+
+		local initial_hitpoints = STATE.TileTypeToHitpoints[current_tile.tile_type]
+
+		if current_tile.hitpoints >= initial_hitpoints * 0.66 then
 			crack_level = "-c1"
-		elseif current_tile.hitpoints < 150 and current_tile.hitpoints >= 100 then
+		elseif current_tile.hitpoints < initial_hitpoints * 0.66 and current_tile.hitpoints > current_tile.hitpoints * 0.33 then
 			crack_level = "-c2"
-		elseif current_tile.hitpoints < 100 and current_tile.hitpoints >= 50 then
+		elseif current_tile.hitpoints <= initial_hitpoints * 0.33 then
 			crack_level = "-c3"
 		end
 	end
