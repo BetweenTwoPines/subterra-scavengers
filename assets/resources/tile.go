@@ -69,7 +69,7 @@ embedded_components {
   id: "sprite"
   type: "sprite"
   data: "default_animation: \"dirt\"\n"
-  "material: \"/builtins/materials/sprite.material\"\n"
+  "material: \"/main/lights/materials/tile_occluder.material\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
