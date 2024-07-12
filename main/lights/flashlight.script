@@ -19,25 +19,25 @@ local function handle_light_direction(self, message)
 	go.set_rotation(vmath.quat_rotation_z(self.angle))
 
 	-- Shader related logic starts here
-	local sprite_size = go.get("#flashlight_beam", "size")
-
-	-- find beginning start point of a sprite based on angle (middle -> back)
-	local from = go.get_position() - vmath.vector3(math.cos(self.angle), math.sin(self.angle), 0) * sprite_size.x / 2
-	-- update frament program constant for our light shader
-	go.set("#flashlight_beam", 'lightPosition', vmath.vector4(from.x, from.y, from.z, 0))
-	-- find ending point of a sprite based on angle (middle -> forward)
-	local to = go.get_position() + vmath.vector3(math.cos(self.angle), math.sin(self.angle), 0) * sprite_size.x / 2
-	-- Draw the line through middle of the sprite start to finish including the angle 
-	local result = physics.raycast(from, to, {hash("ground")})
-
-	if result then
-		-- If raycast hits an object, update the shader with the hit distance
-		local dist = sprite_size * result.fraction
-		go.set("#flashlight_beam", 'maxLightDistance', vmath.vector4(dist.x, dist.y, dist.z, 0))
-	else
-		-- when no collision set full length of flashlight
-		go.set("#flashlight_beam", 'maxLightDistance', vmath.vector4(sprite_size.x, sprite_size.y, sprite_size.z, 0))
-	end
+-- 	local sprite_size = go.get("#flashlight_beam", "size")
+-- 
+-- 	-- find beginning start point of a sprite based on angle (middle -> back)
+-- 	local from = go.get_position() - vmath.vector3(math.cos(self.angle), math.sin(self.angle), 0) * sprite_size.x / 2
+-- 	-- update frament program constant for our light shader
+-- 	go.set("#flashlight_beam", 'lightPosition', vmath.vector4(from.x, from.y, from.z, 0))
+-- 	-- find ending point of a sprite based on angle (middle -> forward)
+-- 	local to = go.get_position() + vmath.vector3(math.cos(self.angle), math.sin(self.angle), 0) * sprite_size.x / 2
+-- 	-- Draw the line through middle of the sprite start to finish including the angle 
+-- 	local result = physics.raycast(from, to, {hash("ground")})
+-- 
+-- 	if result then
+-- 		-- If raycast hits an object, update the shader with the hit distance
+-- 		local dist = sprite_size * result.fraction
+-- 		go.set("#flashlight_beam", 'maxLightDistance', vmath.vector4(dist.x, dist.y, dist.z, 0))
+-- 	else
+-- 		-- when no collision set full length of flashlight
+-- 		go.set("#flashlight_beam", 'maxLightDistance', vmath.vector4(sprite_size.x, sprite_size.y, sprite_size.z, 0))
+-- 	end
 end
 
 function on_message(self, message_id, message, sender)
@@ -45,6 +45,7 @@ function on_message(self, message_id, message, sender)
 		self.player_pos = message.player_pos
 		update_light_position(self)
 	elseif message_id == hash("rotate_light") then
+		print("rotate")
 		handle_light_direction(self, message)
 	elseif message_id == hash("toggle") then
 		if self.enabled then

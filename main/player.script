@@ -89,13 +89,13 @@ function update(self, dt)
 	go.set_position(pos)
 	if self.velocity.x > 0 or self.velocity.x < 0 then
 		-- Only update light position when player is moving
-		msg.post("/lights/lights#flashlight", "move_light", { player_pos = pos })
+		-- msg.post("/lights/lights#flashlight", "move_light", { player_pos = pos })
 	end
 	-- y velocity is never 0, for perfomance reasons only update Y in reder when needed
 	if self.velocity.y < -20 or self.velocity.y > 10 then
 		-- Tell render script to update player y position so we can apply darkening of the world
 		msg.post("@render:", "update_player_position", { y = pos.y })
-		msg.post("/lights/lights#flashlight", "move_light", { player_pos = pos })
+		-- msg.post("/lights/lights#flashlight", "move_light", { player_pos = pos })
 	end
 
 	if not self.ground_contact and self.velocity.y < 0 then -- The player is in the air and moving downwards
