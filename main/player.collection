@@ -95,7 +95,7 @@ embedded_instances {
   "blend_mode: BLEND_MODE_ALPHA\\n"
   "textures {\\n"
   "  sampler: \\\"texture_sampler\\\"\\n"
-  "  texture: \\\"/assets/player/player.atlas\\\"\\n"
+  "  texture: \\\"/assets/entities.atlas\\\"\\n"
   "}\\n"
   "\"\n"
   "  position {\n"

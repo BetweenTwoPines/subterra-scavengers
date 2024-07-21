@@ -9,7 +9,7 @@ textures {
 }
 textures {
   name: "player"
-  texture: "/assets/player/player.atlas"
+  texture: "/assets/entities.atlas"
 }
 textures {
   name: "ui"
