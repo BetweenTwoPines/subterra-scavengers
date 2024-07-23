@@ -78,6 +78,7 @@ local function create_enemy()
 
 		-- Callback for attack implemented by derrived class
 		self.on_attack = nil
+		self.last_attack_stamp = 0
 	end
 
 	--[[
@@ -123,13 +124,19 @@ local function create_enemy()
 		local distance_to_player = vmath.length(player_pos - pos)
 
 		if distance_to_player < self.attack_range then
-			self.attacking = true
-			if self.on_attack then
-				-- call attack function from derrived class
-				self.on_attack(self)
-			else
-				print("WARNING: on_attack not implemented")
+			local now = socket.gettime()
+			-- cooldown between attack hits
+			if now > (self.last_attack_stamp + 2) then
+				self.attacking = true
+				if self.on_attack then
+					-- call attack function from derrived class
+					self.on_attack(self)
+				else
+					print("WARNING: on_attack not implemented")
+				end
+				self.last_attack_stamp = now
 			end
+			
 		elseif distance_to_player < self.detection_range then
 			-- Move towards the player
 			self.moving = true
