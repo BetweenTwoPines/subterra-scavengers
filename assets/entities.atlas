@@ -252,8 +252,8 @@ animations {
     image: "/assets/enemies/worm/attack/worm_attack_6.png"
     sprite_trim_mode: SPRITE_TRIM_MODE_OFF
   }
-  playback: PLAYBACK_LOOP_FORWARD
-  fps: 4
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 5
   flip_horizontal: 0
   flip_vertical: 0
 }
@@ -306,8 +306,8 @@ animations {
     image: "/assets/enemies/worm/attack/worm_attack_6.png"
     sprite_trim_mode: SPRITE_TRIM_MODE_OFF
   }
-  playback: PLAYBACK_LOOP_FORWARD
-  fps: 4
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 5
   flip_horizontal: 1
   flip_vertical: 0
 }
