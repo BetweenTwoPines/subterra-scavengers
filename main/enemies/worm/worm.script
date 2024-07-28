@@ -1,0 +1,30 @@
+local enemy_base = require "main.enemies.enemy_base"
+
+go.property('health', 150)
+go.property('speed', 50)
+go.property('damage', 10)
+go.property('attack_range', 45)
+go.property('max_movement_delay', 1)
+
+function init(self)
+	-- Initialize Game Object
+	self.worm = enemy_base()
+	self.worm.init(self)
+
+	-- Animations
+	self.anim_idle = hash("worm_idle")
+	self.anim_move_left = hash("worm_move_left")
+	self.anim_move_right = hash("worm_move_right")
+	self.anim_attack_right = hash("worm_attack_right")
+	self.anim_attack_left = hash("worm_attack_left")
+
+	-- Override base values
+	self.base_health = self.health
+	self.base_speed = self.speed
+	self.base_damage = self.damage
+	self.base_attack_range =  self.attack_range
+end
+
+function update(self, dt)
+	self.worm.update(self, dt)
+end
