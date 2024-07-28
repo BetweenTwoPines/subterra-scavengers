@@ -1,76 +1,30 @@
 local enemy_base = require "main.enemies.enemy_base"
-local state = require "main.state.game"
 
 go.property('health', 150)
 go.property('speed', 50)
 go.property('damage', 10)
-go.property('attack_range', 30)
+go.property('attack_range', 45)
 go.property('max_movement_delay', 1)
-
--- Animations
-local anim_idle = hash("worm_idle")
-local anim_move_left = hash("worm_move_left")
-local anim_move_right = hash("worm_move_right")
-local anim_attack_right = hash("worm_attack_right")
-local anim_attack_left = hash("worm_attack_left")
-
-local function attack(self)
-	local distance_to_player = self.worm.distance_to_player(self)
-	if distance_to_player < self.attack_range + 5 then
-		local newHealth = state.game_state[state.StateEnum.Player.CurrentHealth] - self.damage
-		if newHealth <= 0 then
-			-- You are dead
-			msg.post("proxy:/controller#controller", "load_menu")
-		else
-			state.game_state[state.StateEnum.Player.CurrentHealth] = newHealth
-			msg.post("/gui#ui", "update_heatlh")
-		end
-	end
-end
 
 function init(self)
 	-- Initialize Game Object
 	self.worm = enemy_base()
 	self.worm.init(self)
 
+	-- Animations
+	self.anim_idle = hash("worm_idle")
+	self.anim_move_left = hash("worm_move_left")
+	self.anim_move_right = hash("worm_move_right")
+	self.anim_attack_right = hash("worm_attack_right")
+	self.anim_attack_left = hash("worm_attack_left")
+
 	-- Override base values
 	self.base_health = self.health
 	self.base_speed = self.speed
 	self.base_damage = self.damage
 	self.base_attack_range =  self.attack_range
-	self.on_attack = function() end  -- For the worm there is no complex logic to handle for attacking
-	
-	self.anim_in_progress = false
-end
-
-local function anim_done(self, message_id, message, sender)
-	if message_id == hash("animation_done") then
-		if message.id == anim_attack_right or message.id == anim_attack_left then
-			self.attacking = false;
-			self.anim_in_progress = false
-			attack(self)
-		end
-	end
-end
-
-local function update_animation(self)
-	if self.anim_in_progress then
-		return
-	end
-	if self.attacking == true then
-		local anim_attack = (self.direction == 1) and anim_attack_right or anim_attack_left
-		self.worm.play_animation(self, anim_attack, anim_done, true)
-		self.anim_in_progress = true
-	elseif self.moving == false then
-		self.worm.play_animation(self, anim_idle)
-	elseif self.moving and self.direction == 1 then
-		self.worm.play_animation(self, anim_move_right)
-	elseif self.moving and self.direction == -1 then
-		self.worm.play_animation(self, anim_move_left)
-	end
 end
 
 function update(self, dt)
 	self.worm.update(self, dt)
-	update_animation(self)
 end

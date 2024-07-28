@@ -1,53 +1,4 @@
---[[
-This base enemy class provides a generic implementation for enemy behavior, 
-including movement, attack, and player detection. To use this base class, 
-follow the steps below:
-
-In the specific enemy module do following:
-
-1. Require the base enemy module:
-	local enemy_base = require "main.enemies.enemy_base"
-
-2. Define enemy-specific properties using go.property:
-	go.property('health', 150)
-	go.property('speed', 50)
-	go.property('damage', 10)
-	etc
-
-	these can be used to override the base_* properties of the base class ex: 
-	self.base_health = self.health
-	
-3. Define enemy-specific animations and implement update_animation function:
-	local anim_idle = hash("enemy_idle")
-	local anim_move_left = hash("enemy_move_left")
-	etc
-
-	local function update_animation(self)
-		if self.attacking then
-			local anim_attack = (self.direction == 1) and anim_attack_right or anim_attack_left
-			self.worm.play_animation(self, anim_attack)
-		elseif self.moving == false then
-			self.worm.play_animation(self, anim_idle)
-		end
-	end
-
-4. Implement the attack callback function:
-	local function attack(self)
-		print("Attacking the player!")
-	end
-
-5. Initialize the enemy in the init() function this will create a singleton of this class
-	function init(self)
-		self.enemy = enemy_base()
-		self.enemy.init(self)
-
-		-- Override base values
-		self.base_health = self.health
-		self.base_attack_range = self.attack_range
-		self.on_attack = function(self) attack(self) end
-	end
-]]--
-
+local state = require "main.state.game"
 local function create_enemy()
 	local M = {}
 
@@ -56,7 +7,13 @@ local function create_enemy()
 		self.base_health = 100
 		self.base_speed = 50
 		self.base_damage = 10
-
+		
+		-- Animation properties
+		self.anim_idle = nil
+		self.anim_move_left = nil
+		self.anim_move_right = nil
+		self.anim_attack_left = nil
+		self.anim_attack_right = nil
 		self.current_animation = nil -- the currently playing animation
 
 		-- Movement specific properties
@@ -75,22 +32,50 @@ local function create_enemy()
 		-- Player detection properties
 		self.player = "/player/player"
 		self.detection_range = 200 -- min distance within which the enemy will start moving towards the player
+	end
 
-		-- Callback for attack implemented by derrived class
-		self.on_attack = nil
+	local function get_distance_to_player(self)
+		local pos = go.get_position()
+		local player_pos = go.get_position(self.player)
+		return vmath.length(player_pos - pos)
+	end
+
+	local function handle_attack(self)
+		local distance_to_player = get_distance_to_player(self)
+		
+		if distance_to_player < self.attack_range then
+			local newHealth = state.game_state[state.StateEnum.Player.CurrentHealth] - self.damage
+			if newHealth <= 0 then
+				-- take plater back to menu once they are dead
+				msg.post("proxy:/controller#controller", "load_menu")
+			else
+				-- udpdate health after enemy attacks player
+				state.game_state[state.StateEnum.Player.CurrentHealth] = newHealth
+				msg.post("/gui#ui", "update_heatlh")
+			end
+		end
+	end
+
+	
+	local function anim_done(self, message_id, message, sender)
+		if message_id == hash("animation_done") then
+			if message.id == self.anim_attack_right or message.id == self.anim_attack_left then
+				self.attacking = false;
+				handle_attack(self)
+			end
+		end
 	end
 
 	--[[
 	anim - id of animation to play
-	callback - function to run at the end of animation
 	ignore_save - prevent storing previously playing animation (for example when attack needs to be playing again)
 	]]
-	
-	function M.play_animation(self, anim, callback, ignore_save)
+
+	local function play_animation(self, anim, ignore_save)
 		-- only play animations which are not already playing
 		if self.current_animation ~= anim then
 			-- tell the sprite to play the animation
-			sprite.play_flipbook("#sprite", anim, callback)
+			sprite.play_flipbook("#sprite", anim, anim_done)
 			-- remember which animation is playing
 			if ignore_save then
 				self.current_animation = nil
@@ -101,10 +86,17 @@ local function create_enemy()
 		end
 	end
 
-	function M.distance_to_player(self)
-		local pos = go.get_position()
-		local player_pos = go.get_position(self.player)
-		return vmath.length(player_pos - pos)
+	local function update_animation(self)
+		if self.attacking == true then
+			local anim_attack = (self.direction == 1) and self.anim_attack_right or self.anim_attack_left
+			play_animation(self, anim_attack, true)
+		elseif self.moving == false then
+			play_animation(self, self.anim_idle)
+		elseif self.moving and self.direction == 1 then
+			play_animation(self, self.anim_move_right)
+		elseif self.moving and self.direction == -1 then
+			play_animation(self, self.anim_move_left)
+		end
 	end
 
 	function M.update(self, dt)
@@ -124,12 +116,6 @@ local function create_enemy()
 
 		if distance_to_player < self.attack_range then
 			self.attacking = true
-			if self.on_attack then
-				-- call attack function from derrived class
-				self.on_attack(self)
-			else
-				print("WARNING: on_attack not implemented")
-			end
 		elseif distance_to_player < self.detection_range then
 			-- Move towards the player
 			self.moving = true
@@ -154,6 +140,7 @@ local function create_enemy()
 		end
 
 		go.set_position(pos)
+		update_animation(self)
 	end
 
 	return M
