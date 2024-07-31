@@ -67,7 +67,6 @@ function update(self, dt)
 	if not self.static then
 		-- Get mouse position
 		local crosshair_pos = go.get_world_position("/crosshair")
-		-- local crosshair_pos = go.get_position("/crosshair")
 		-- Convert mouse position to world position
 		local mouse_pos = vmath.vector3(crosshair_pos.x, crosshair_pos.y, 0)
 
