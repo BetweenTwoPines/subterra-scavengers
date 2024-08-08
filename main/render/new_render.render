@@ -7,3 +7,7 @@ render_resources {
   name: "model"
   path: "/builtins/materials/model.material"
 }
+render_resources {
+  name: "world"
+  path: "/main/lights/materials/model.material"
+}

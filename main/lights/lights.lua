@@ -11,6 +11,7 @@ local BLACKTRANSPARENT = vmath.vector4(0, 0, 0, 0)
 
 local quad_pred = nil
 local clear_color = nil
+local world = nil
 
 -- draw lights to quad with shadow_map as input texture
 local function draw_light(light, view, projection)
@@ -24,6 +25,7 @@ local function draw_light(light, view, projection)
 
 	render.set_render_target(render.RENDER_TARGET_DEFAULT)
 	render.enable_texture(0, light.shadowmap, render.BUFFER_COLOR_BIT)
+	render.enable_texture(1, world, render.BUFFER_COLOR_BIT)
 
 	local constants = render.constant_buffer()
 	constants.light_pos = vmath.vector4(light.position.x, light.position.y, light.position.z, 0)
@@ -35,12 +37,13 @@ local function draw_light(light, view, projection)
 	render.draw(quad_pred, { constants = constants })
 
 	render.disable_texture(0, light.shadowmap)
+	render.disable_texture(1, world)
 end
 
 -- draw 1D shadow map containing distance to occluder
 -- draw using the shadow_map.material
 -- use the occluder_target as input
-local function draw_shadow_map(light)
+local function draw_shadow_map(light, view, projection)
 	-- Set viewport
 	render.set_viewport(0, 0, light.size, 1)
 
@@ -151,12 +154,13 @@ local function resize_shadowmap(light, size)
 end
 
 
-function M.init(config)
+function M.init(self)
 	local width = render.get_window_width()
 	local height = render.get_window_height()
 	render_target_size = math.max(width, height)
 	quad_pred = render.predicate({ "light_quad" })
 	clear_color = vmath.vector4(0,0,0,1)
+	world = self.world
 end
 
 function M.set_clear_color(color)
@@ -187,7 +191,7 @@ function M.draw(view, projection, occluder_predicate)
 			light.size_half = light_size / 2
 			if light.size >= 1 then
 				draw_occluder(light, view, projection, occluder_predicate)
-				draw_shadow_map(light)
+				draw_shadow_map(light, view, projection)
 				draw_light(light, view, projection)
 			end
 		end

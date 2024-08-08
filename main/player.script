@@ -94,7 +94,7 @@ function update(self, dt)
 	-- y velocity is never 0, for perfomance reasons only update Y in reder when needed
 	if self.velocity.y < -20 or self.velocity.y > 10 then
 		-- Tell render script to update player y position so we can apply darkening of the world
-		msg.post("@render:", "update_player_position", { y = pos.y })
+		msg.post("@render:", "update_player_position", { pos = pos })
 		-- msg.post("/lights/lights#flashlight", "move_light", { player_pos = pos })
 	end
 

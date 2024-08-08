@@ -24,7 +24,6 @@ function on_message(self, message_id, message, sender)
 		self.player_pos = message.player_pos
 		update_light_position(self)
 	elseif message_id == hash("rotate_light") then
-		print("rotate")
 		handle_light_direction(self, message)
 	elseif message_id == hash("toggle") then
 		if self.enabled then
